@@ -1,8 +1,8 @@
-package main
+package routing
 
 import "github.com/gin-gonic/gin"
 
-func startRouter() {
+func StartRouter() {
 	r := gin.Default()
 	// display all projects (with statistics)
 	r.GET("/projects", getAllProjects)
@@ -47,7 +47,6 @@ func startRouter() {
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
-
 
 func getAllProjects(c *gin.Context) {
 	// TODO
