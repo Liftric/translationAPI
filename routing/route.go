@@ -1,9 +1,9 @@
 package routing
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"net/http"
 	"preventis.io/translationApi/model"
 )
 
@@ -57,26 +57,19 @@ func StartRouter(database *gorm.DB) {
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
 
-func getAllProjects(c *gin.Context) {
-	var projects []model.Project
-	db.Find(&projects)
-	c.JSON(200, projects)
-}
-func getProject(c *gin.Context) {
-	id := c.Param("id")
-	var project model.Project
-	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.JSON(200, project)
-	}
-}
 func createProject(c *gin.Context) {
 	var project model.Project
-	c.BindJSON(&project)
+	var json ProjectValidation
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	project.Name = json.Name
 
-	db.Create(&project)
+	if dbc := db.Create(&project); dbc.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
+		return
+	}
 	c.JSON(200, project)
 }
 func createLanguage(c *gin.Context) {
