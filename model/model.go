@@ -15,6 +15,7 @@ type Project struct {
 	BaseLanguage      Language `gorm:"foreignkey:BaseLanguageRefer"`
 	BaseLanguageRefer uint
 	Languages         []Language `gorm:"many2many:project_languages;"`
+	Archived          bool
 }
 
 type Language struct {

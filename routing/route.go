@@ -3,8 +3,6 @@ package routing
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"net/http"
-	"preventis.io/translationApi/model"
 )
 
 var db *gorm.DB
@@ -57,21 +55,6 @@ func StartRouter(database *gorm.DB) {
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
 
-func createProject(c *gin.Context) {
-	var project model.Project
-	var json ProjectValidation
-	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	project.Name = json.Name
-
-	if dbc := db.Create(&project); dbc.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
-		return
-	}
-	c.JSON(200, project)
-}
 func createLanguage(c *gin.Context) {
 	// TODO
 }
@@ -87,9 +70,7 @@ func updateTranslation(c *gin.Context) {
 func setRevised(c *gin.Context) {
 	// TODO
 }
-func renameProject(c *gin.Context) {
-	// TODO
-}
+
 func moveKey(c *gin.Context) {
 	// TODO
 }
@@ -99,9 +80,7 @@ func addLanguage(c *gin.Context) {
 func setBaseLanguage(c *gin.Context) {
 	// TODO
 }
-func archiveProject(c *gin.Context) {
-	// TODO
-}
+
 func deleteKey(c *gin.Context) {
 	// TODO
 }
