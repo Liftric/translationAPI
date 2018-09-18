@@ -36,3 +36,4 @@
 [[constraint]]
   name = "github.com/jinzhu/gorm"
   branch = "master"
+
