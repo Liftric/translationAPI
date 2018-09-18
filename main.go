@@ -21,7 +21,7 @@ func main() {
 	defer db.Close()
 
 	model.InitDB(db)
-	routing.StartRouter()
+	routing.StartRouter(db)
 }
 
 func getDbArgs(dbDialect string) string {

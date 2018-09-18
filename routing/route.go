@@ -1,8 +1,17 @@
 package routing
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	"preventis.io/translationApi/model"
+)
 
-func StartRouter() {
+var db *gorm.DB
+
+func StartRouter(database *gorm.DB) {
+	db = database
+
 	r := gin.Default()
 	// display all projects (with statistics)
 	r.GET("/projects", getAllProjects)
@@ -49,15 +58,26 @@ func StartRouter() {
 }
 
 func getAllProjects(c *gin.Context) {
-	// TODO
+	var projects []model.Project
+	db.Find(&projects)
+	c.JSON(200, projects)
 }
 func getProject(c *gin.Context) {
 	id := c.Param("id")
-	println(id)
-	// TODO
+	var project model.Project
+	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, project)
+	}
 }
 func createProject(c *gin.Context) {
-	// TODO
+	var project model.Project
+	c.BindJSON(&project)
+
+	db.Create(&project)
+	c.JSON(200, project)
 }
 func createLanguage(c *gin.Context) {
 	// TODO
