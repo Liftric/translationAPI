@@ -3,15 +3,11 @@ package routing
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"net/http"
-	"preventis.io/translationApi/model"
 )
 
 var db *gorm.DB
 
-func StartRouter(database *gorm.DB) {
-	db = database
-
+func setupRouter() *gin.Engine {
 	r := gin.Default()
 
 	projectsRoutes := r.Group("/projects")
@@ -74,28 +70,14 @@ func StartRouter(database *gorm.DB) {
 
 	// create language
 	r.PUT("/language", createLanguage)
-
-	r.Run() // listen and serve on 0.0.0.0:8080
+	// get languages
+	r.GET("/languages", getLanguages)
+	return r
 }
 
-type languageValidation struct {
-	Name    string `form:"name" json:"name" xml:"name"  binding:"required"`
-	IsoCode string `form:"languageCode" json:"languageCode" xml:"languageCode"  binding:"required"`
-}
+func StartRouter(database *gorm.DB) {
+	db = database
 
-func createLanguage(c *gin.Context) {
-	var language model.Language
-	var json languageValidation
-	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	language.Name = json.Name
-	language.IsoCode = json.IsoCode
-
-	if dbc := db.Create(&language); dbc.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
-		return
-	}
-	c.JSON(201, language)
+	r := setupRouter()
+	r.Run(":8080") // listen and serve on 0.0.0.0:8080
 }

@@ -9,14 +9,12 @@ import (
 
 func getAllActiveProjects(c *gin.Context) {
 	var projects []model.Project
-	db.Find(&projects)
 	db.Where("archived = ?", false).Find(&projects)
 	c.JSON(200, projects)
 }
 
 func getAllArchivedProjects(c *gin.Context) {
 	var projects []model.Project
-	db.Find(&projects)
 	db.Where("archived = ?", true).Find(&projects)
 	c.JSON(200, projects)
 }

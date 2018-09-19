@@ -1,6 +1,21 @@
 package model
 
-import "github.com/jinzhu/gorm"
+import (
+	"fmt"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+)
+
+func StartDB(dbDialect string, dbArgs string) *gorm.DB {
+	db, err := gorm.Open(dbDialect, dbArgs)
+	if err != nil {
+		panic(fmt.Sprintf("failed to connect database: %s", err.Error()))
+	}
+	InitDB(db)
+	return db
+}
 
 func InitDB(db *gorm.DB) {
 	db.AutoMigrate(&Language{})

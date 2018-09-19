@@ -2,10 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+
 	"os"
 	"preventis.io/translationApi/model"
 	"preventis.io/translationApi/routing"
@@ -15,13 +12,8 @@ func main() {
 	dbDialect := getEnv("DATABASE_TYPE", "sqlite3")
 	dbArgs := getDbArgs(dbDialect)
 
-	db, err := gorm.Open(dbDialect, dbArgs)
-	if err != nil {
-		panic("failed to connect database")
-	}
+	db := model.StartDB(dbDialect, dbArgs)
 	defer db.Close()
-
-	model.InitDB(db)
 	routing.StartRouter(db)
 }
 
