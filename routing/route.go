@@ -12,7 +12,9 @@ func StartRouter(database *gorm.DB) {
 
 	r := gin.Default()
 	// display all projects (with statistics)
-	r.GET("/projects", getAllProjects)
+	r.GET("/projects", getAllActiveProjects)
+	// display all archived projects
+	r.GET("/projects/archived", getAllArchivedProjects)
 	// display all strings, statistics and config of a project
 	r.GET("/project/:id", getProject)
 	// create project
