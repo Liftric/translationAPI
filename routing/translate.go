@@ -7,20 +7,20 @@ import (
 	"preventis.io/translationApi/model"
 )
 
-type stringKeyValidation struct {
-	ProjectId int    `form:"projectId" json:"projectId" xml:"projectId"  binding:"required"`
-	Key       string `form:"key" json:"key" xml:"key"  binding:"required"`
+type stringIdentifierValidation struct {
+	ProjectId  int    `form:"projectId" json:"projectId" xml:"projectId"  binding:"required"`
+	Identifier string `form:"identifier" json:"identifier" xml:"identifier"  binding:"required"`
 }
 
-func createKey(c *gin.Context) {
-	var json stringKeyValidation
+func createIdentifier(c *gin.Context) {
+	var json stringIdentifierValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	var key model.StringIdentifier
-	key.Identifier = json.Key
+	key.Identifier = json.Identifier
 	var project model.Project
 	if err := db.Where("id = ?", json.ProjectId).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)

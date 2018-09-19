@@ -17,6 +17,18 @@ type simpleProjectDTO struct {
 func getAllActiveProjects(c *gin.Context) {
 	var projects []model.Project
 	db.Where("archived = ?", false).Preload("BaseLanguage").Preload("Languages").Find(&projects)
+	result := convertProjectListToDTO(projects)
+	c.JSON(200, result)
+}
+
+func getAllArchivedProjects(c *gin.Context) {
+	var projects []model.Project
+	db.Where("archived = ?", true).Find(&projects)
+	result := convertProjectListToDTO(projects)
+	c.JSON(200, result)
+}
+
+func convertProjectListToDTO(projects []model.Project) []simpleProjectDTO {
 	var result []simpleProjectDTO
 	result = []simpleProjectDTO{}
 	for _, e := range projects {
@@ -27,13 +39,7 @@ func getAllActiveProjects(c *gin.Context) {
 		p := simpleProjectDTO{e.ID, e.Name, e.BaseLanguage, languages}
 		result = append(result, p)
 	}
-	c.JSON(200, result)
-}
-
-func getAllArchivedProjects(c *gin.Context) {
-	var projects []model.Project
-	db.Where("archived = ?", true).Find(&projects)
-	c.JSON(200, projects)
+	return result
 }
 
 func getProject(c *gin.Context) {

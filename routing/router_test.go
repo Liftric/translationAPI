@@ -15,8 +15,10 @@ func setupTestEnvironment() *gin.Engine {
 
 	proj1 := model.Project{Name: "Shared", BaseLanguage: eng, Languages: []model.Language{ger}}
 	proj2 := model.Project{Name: "Base", BaseLanguage: ger}
+	archivedProj := model.Project{Name: "Archived", BaseLanguage: ger, Archived: true}
 	db.Create(&proj1)
 	db.Create(&proj2)
+	db.Create(&archivedProj)
 
 	key1 := model.StringIdentifier{Identifier: "key1", Project: proj1}
 	key2 := model.StringIdentifier{Identifier: "key2", Project: proj2}

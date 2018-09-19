@@ -56,16 +56,16 @@ func setupRouter() *gin.Engine {
 		translationRoutes.POST("/approve/:id", setApproved)
 	}
 
-	keyRoutes := r.Group("/key")
+	identifierRoutes := r.Group("/identifier")
 	{
 		// create key in project
-		keyRoutes.PUT("", createKey)
+		identifierRoutes.PUT("", createIdentifier)
 		// change key
-		keyRoutes.POST("/:id", updateKey)
+		identifierRoutes.POST("/:id", updateKey)
 		// move key to another project
-		keyRoutes.POST("/:id/move/:projectId", moveKey)
+		identifierRoutes.POST("/:id/move/:projectId", moveKey)
 		// delete key
-		keyRoutes.DELETE("/:id", deleteKey)
+		identifierRoutes.DELETE("/:id", deleteKey)
 	}
 
 	// create language
