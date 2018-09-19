@@ -70,7 +70,7 @@ func renameProject(c *gin.Context) {
 		return
 	}
 	var project model.Project
-	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
+	if err := db.Where("id = ?", json.Id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	} else {
@@ -92,7 +92,7 @@ func archiveProject(c *gin.Context) {
 		return
 	}
 	var project model.Project
-	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
+	if err := db.Where("id = ?", json.Id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	} else {
