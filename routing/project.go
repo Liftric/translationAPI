@@ -48,6 +48,7 @@ func getProject(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	} else {
 		c.JSON(200, project)
 	}
@@ -71,6 +72,7 @@ func createProject(c *gin.Context) {
 	if err := db.Where("iso_code = ?", json.IsoCode).First(&baseLang).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	}
 
 	if dbc := db.Create(&project); dbc.Error != nil {
@@ -95,6 +97,7 @@ func renameProject(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	} else {
 		project.Name = json.Name
 		db.Save(&project)
@@ -117,6 +120,7 @@ func archiveProject(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	} else {
 		project.Archived = json.Archive
 		db.Save(&project)
@@ -139,11 +143,13 @@ func addLanguageToProject(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	} else {
 		var lang model.Language
 		if err := db.Where("iso_code = ?", json.IsoCode).First(&lang).Error; err != nil {
 			c.AbortWithStatus(404)
 			fmt.Println(err)
+			return
 		}
 		db.Model(&project).Association("Languages").Append(lang)
 		db.Save(&project)
@@ -162,11 +168,13 @@ func setBaseLanguage(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	} else {
 		var baseLang model.Language
 		if err := db.Where("iso_code = ?", json.IsoCode).First(&baseLang).Error; err != nil {
 			c.AbortWithStatus(404)
 			fmt.Println(err)
+			return
 		}
 		project.BaseLanguage = baseLang
 		db.Save(&project)

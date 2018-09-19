@@ -41,9 +41,9 @@ type Language struct {
 
 type StringIdentifier struct {
 	gorm.Model
-	Identifier   string
+	Identifier   string `gorm:"unique_index:idx_identifier_project"`
 	Project      Project
-	ProjectID    uint `gorm:"not null"`
+	ProjectID    uint `gorm:"not null;unique_index:idx_identifier_project"`
 	Translations []Translation
 }
 

@@ -25,8 +25,16 @@ func createIdentifier(c *gin.Context) {
 	if err := db.Where("id = ?", json.ProjectId).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	}
 	key.Project = project
+
+	var existingKeys []model.StringIdentifier
+	db.Where("Identifier = ? AND project_id = ?", "newIdentifier", 1).Find(&existingKeys)
+	if len(existingKeys) > 0 {
+		c.Status(409)
+		return
+	}
 
 	if dbc := db.Create(&key); dbc.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
@@ -35,13 +43,13 @@ func createIdentifier(c *gin.Context) {
 	c.Status(201)
 }
 
-type updateKeyValidation struct {
-	Key string `form:"key" json:"key" xml:"key"  binding:"required"`
+type updateIdentifierValidation struct {
+	Key string `form:"identifier" json:"identifier" xml:"identifier"  binding:"required"`
 }
 
-func updateKey(c *gin.Context) {
+func updateIdentifier(c *gin.Context) {
 	id := c.Param("id")
-	var json updateKeyValidation
+	var json updateIdentifierValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -51,6 +59,7 @@ func updateKey(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	}
 	key.Identifier = json.Key
 	db.Save(&key)
@@ -76,6 +85,7 @@ func createTranslation(c *gin.Context) {
 	if err := db.Where("id = ?", json.KeyId).First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	}
 	translation.Identifier = key
 
@@ -83,6 +93,7 @@ func createTranslation(c *gin.Context) {
 	if err := db.Where("IsoCode = ?", json.Language).First(&lang).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	}
 	translation.Language = lang
 
@@ -109,6 +120,7 @@ func updateTranslation(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&translation).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	}
 	translation.Translation = json.Translation
 	db.Save(&translation)
@@ -120,6 +132,7 @@ func setApproved(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&translation).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	} else {
 		translation.Approved = true
 		db.Save(&translation)
@@ -135,12 +148,14 @@ func moveKey(c *gin.Context) {
 	if err := db.Where("id = ?", projectId).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	}
 
 	var key model.StringIdentifier
 	if err := db.Where("id = ?", id).First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	}
 	key.Project = project
 	db.Save(&key)
@@ -153,6 +168,7 @@ func deleteKey(c *gin.Context) {
 	if err := db.Where("id = ?", id).First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
+		return
 	}
 	db.Delete(&key)
 	c.Status(200)

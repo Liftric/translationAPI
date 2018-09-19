@@ -61,7 +61,7 @@ func setupRouter() *gin.Engine {
 		// create key in project
 		identifierRoutes.PUT("", createIdentifier)
 		// change key
-		identifierRoutes.POST("/:id", updateKey)
+		identifierRoutes.POST("/:id", updateIdentifier)
 		// move key to another project
 		identifierRoutes.POST("/:id/move/:projectId", moveKey)
 		// delete key
