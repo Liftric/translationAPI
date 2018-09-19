@@ -13,50 +13,67 @@ func StartRouter(database *gorm.DB) {
 	db = database
 
 	r := gin.Default()
-	// display all projects (with statistics)
-	r.GET("/projects", getAllActiveProjects)
-	// display all archived projects
-	r.GET("/projects/archived", getAllArchivedProjects)
-	// display all strings, statistics and config of a project
-	r.GET("/project/:id", getProject)
-	// create project
-	r.PUT("/project", createProject)
+
+	projectsRoutes := r.Group("/projects")
+	{
+		// display all projects (with statistics)
+		projectsRoutes.GET("", getAllActiveProjects)
+		// display all archived projects
+		projectsRoutes.GET("/archived", getAllArchivedProjects)
+	}
+
+	projectRoutes := r.Group("/project")
+	{
+		// display all strings, statistics and config of a project
+		projectRoutes.GET("/:id", getProject)
+		// create project
+		projectRoutes.PUT("", createProject)
+		// add language to project
+		projectRoutes.PUT("/:id/languages", addLanguageToProject)
+		// set base language of project
+		projectRoutes.POST("/:id/baseLanguage", setBaseLanguage)
+		// archive project
+		projectRoutes.DELETE("/:id", archiveProject)
+		// change project name
+		projectRoutes.POST("/:id/name", renameProject)
+		// diff iOS strings file and db
+		projectRoutes.POST("/:id/ios", diffIOS)
+		// diff android strings file and db
+		projectRoutes.POST("/:id/android", diffAndroid)
+		// diff excel file and db
+		projectRoutes.POST("/:id/excel", diffExcel)
+		// export ios strings
+		projectRoutes.GET("/:id/ios", exportIOS)
+		// export android strings
+		projectRoutes.GET("/:id/android", exportAndroid)
+		// export to excel
+		projectRoutes.GET("/:id/excel", exportExcel)
+	}
+
+	translationRoutes := r.Group("/translation")
+	{
+		// create translation
+		translationRoutes.PUT("", createTranslation)
+		// change translation
+		translationRoutes.POST("/update/:id", updateTranslation)
+		// set revised for translation in a language
+		translationRoutes.POST("/approve/:id", setApproved)
+	}
+
+	keyRoutes := r.Group("/key")
+	{
+		// create key in project
+		keyRoutes.PUT("", createKey)
+		// change key
+		keyRoutes.POST("/:id", updateKey)
+		// move key to another project
+		keyRoutes.POST("/:id/move/:projectId", moveKey)
+		// delete key
+		keyRoutes.DELETE("/:id", deleteKey)
+	}
+
 	// create language
 	r.PUT("/language", createLanguage)
-	// create key in project
-	r.PUT("/key", createKey)
-	// change key
-	r.POST("/key/:id", updateKey)
-	// create translation
-	r.PUT("/translation", createTranslation)
-	// change translation
-	r.POST("/translation/update/:id", updateTranslation)
-	// set revised for translation in a language
-	r.POST("/translation/approve/:id", setApproved)
-	// change project name
-	r.POST("/projectName", renameProject)
-	// move key to another project
-	r.POST("/key/:id/move/:projectId", moveKey)
-	// add language to project
-	r.PUT("/project/:id/languages", addLanguageToProject)
-	// set base language of project
-	r.POST("/project/:id/baseLanguage", setBaseLanguage)
-	// archive project
-	r.DELETE("/project/:id", archiveProject)
-	// delete key
-	r.DELETE("/key/:id", deleteKey)
-	// diff iOS strings file and db
-	r.POST("/project/:id/ios", diffIOS)
-	// diff android strings file and db
-	r.POST("/project/:id/android", diffAndroid)
-	// diff excel file and db
-	r.POST("/project/:id/excel", diffExcel)
-	// export ios strings
-	r.GET("/project/:id/ios", exportIOS)
-	// export android strings
-	r.GET("/project/:id/android", exportAndroid)
-	// export to excel
-	r.GET("/project/:id/excel", exportExcel)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }

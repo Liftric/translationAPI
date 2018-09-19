@@ -60,18 +60,18 @@ func createProject(c *gin.Context) {
 }
 
 type ProjectRenameValidation struct {
-	Id   uint   `form:"id" json:"id" xml:"id"  binding:"required"`
 	Name string `form:"name" json:"name" xml:"name"  binding:"required"`
 }
 
 func renameProject(c *gin.Context) {
+	id := c.Param("id")
 	var json ProjectRenameValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	var project model.Project
-	if err := db.Where("id = ?", json.Id).First(&project).Error; err != nil {
+	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	} else {
