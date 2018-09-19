@@ -18,6 +18,11 @@ func setupTestEnvironment() *gin.Engine {
 	db.Create(&proj1)
 	db.Create(&proj2)
 
+	key1 := model.StringIdentifier{Identifier: "key1", Project: proj1}
+	key2 := model.StringIdentifier{Identifier: "key2", Project: proj2}
+	db.Create(&key1)
+	db.Create(&key2)
+
 	router := setupRouter()
 	return router
 }

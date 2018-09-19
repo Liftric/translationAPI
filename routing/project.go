@@ -7,7 +7,7 @@ import (
 	"preventis.io/translationApi/model"
 )
 
-type projectDTO struct {
+type simpleProjectDTO struct {
 	Id           uint
 	Name         string
 	BaseLanguage model.Language
@@ -17,14 +17,14 @@ type projectDTO struct {
 func getAllActiveProjects(c *gin.Context) {
 	var projects []model.Project
 	db.Where("archived = ?", false).Preload("BaseLanguage").Preload("Languages").Find(&projects)
-	var result []projectDTO
-	result = []projectDTO{}
+	var result []simpleProjectDTO
+	result = []simpleProjectDTO{}
 	for _, e := range projects {
 		var languages = e.Languages
 		if languages == nil {
 			languages = []model.Language{}
 		}
-		p := projectDTO{e.ID, e.Name, e.BaseLanguage, languages}
+		p := simpleProjectDTO{e.ID, e.Name, e.BaseLanguage, languages}
 		result = append(result, p)
 	}
 	c.JSON(200, result)

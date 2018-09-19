@@ -19,8 +19,8 @@ func createKey(c *gin.Context) {
 		return
 	}
 
-	var key model.StringKey
-	key.Key = json.Key
+	var key model.StringIdentifier
+	key.Identifier = json.Key
 	var project model.Project
 	if err := db.Where("id = ?", json.ProjectId).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
@@ -47,12 +47,12 @@ func updateKey(c *gin.Context) {
 		return
 	}
 
-	var key model.StringKey
+	var key model.StringIdentifier
 	if err := db.Where("id = ?", id).First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	}
-	key.Key = json.Key
+	key.Identifier = json.Key
 	db.Save(&key)
 	c.Status(200)
 }
@@ -72,12 +72,12 @@ func createTranslation(c *gin.Context) {
 
 	var translation model.Translation
 	translation.Translation = json.Translation
-	var key model.StringKey
+	var key model.StringIdentifier
 	if err := db.Where("id = ?", json.KeyId).First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	}
-	translation.Key = key
+	translation.Identifier = key
 
 	var lang model.Language
 	if err := db.Where("IsoCode = ?", json.Language).First(&lang).Error; err != nil {
@@ -137,7 +137,7 @@ func moveKey(c *gin.Context) {
 		fmt.Println(err)
 	}
 
-	var key model.StringKey
+	var key model.StringIdentifier
 	if err := db.Where("id = ?", id).First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
@@ -149,7 +149,7 @@ func moveKey(c *gin.Context) {
 
 func deleteKey(c *gin.Context) {
 	id := c.Param("id")
-	var key model.StringKey
+	var key model.StringIdentifier
 	if err := db.Where("id = ?", id).First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)

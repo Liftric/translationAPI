@@ -20,17 +20,18 @@ func StartDB(dbDialect string, dbArgs string) *gorm.DB {
 func InitDB(db *gorm.DB) {
 	db.AutoMigrate(&Language{})
 	db.AutoMigrate(&Project{})
-	db.AutoMigrate(&StringKey{})
+	db.AutoMigrate(&StringIdentifier{})
 	db.AutoMigrate(&Translation{})
 }
 
 type Project struct {
 	gorm.Model
-	Name              string   `gorm:"unique;not null"`
-	BaseLanguage      Language `gorm:"foreignkey:BaseLanguageRefer"`
-	BaseLanguageRefer string
+	Name              string     `gorm:"unique;not null"`
+	BaseLanguage      Language   `gorm:"foreignkey:BaseLanguageRefer"`
+	BaseLanguageRefer string     `gorm:"not null"`
 	Languages         []Language `gorm:"many2many:project_languages;"`
 	Archived          bool
+	Identifiers       []StringIdentifier
 }
 
 type Language struct {
@@ -38,19 +39,20 @@ type Language struct {
 	Name    string `gorm:"unique;not null"`
 }
 
-type StringKey struct {
+type StringIdentifier struct {
 	gorm.Model
-	Key          string
-	Project      Project `gorm:"foreignkey:ProjectRefer"`
-	ProjectRefer uint
+	Identifier   string
+	Project      Project
+	ProjectID    uint `gorm:"not null"`
+	Translations []Translation
 }
 
 type Translation struct {
 	gorm.Model
-	Translation   string
-	Key           StringKey `gorm:"foreignkey:KeyRefer"`
-	KeyRefer      uint
-	Language      Language `gorm:"foreignkey:LanguageRefer"`
-	LanguageRefer string
-	Approved      bool `gorm:"default:'false'"`
+	Translation        string
+	Identifier         StringIdentifier
+	StringIdentifierID uint     `gorm:"not null"`
+	Language           Language `gorm:"foreignkey:LanguageRefer"`
+	LanguageRefer      string   `gorm:"not null"`
+	Approved           bool     `gorm:"default:'false'"`
 }
