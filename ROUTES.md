@@ -34,3 +34,9 @@ The import routes should give back the diff. The web frontend should then do the
 * import iOS strings file
 * import android strings xml
 * import excel file
+
+## Export
+
+* export to iOS strings file
+* export to android strings xml
+* export to excel file

@@ -3,6 +3,8 @@ package routing
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"net/http"
+	"preventis.io/translationApi/model"
 )
 
 var db *gorm.DB
@@ -34,7 +36,7 @@ func StartRouter(database *gorm.DB) {
 	// move key to another project
 	r.POST("/project/:id/moveKey", moveKey)
 	// add language to project
-	r.PUT("/project/:id/languages", addLanguage)
+	r.PUT("/project/:id/languages", addLanguageToProject)
 	// set base language of project
 	r.POST("/project/:id/baseLanguage", setBaseLanguage)
 	// archive project
@@ -57,50 +59,24 @@ func StartRouter(database *gorm.DB) {
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
 
+type languageValidation struct {
+	Name    string `form:"name" json:"name" xml:"name"  binding:"required"`
+	IsoCode string `form:"languageCode" json:"languageCode" xml:"languageCode"  binding:"required"`
+}
+
 func createLanguage(c *gin.Context) {
-	// TODO
-}
-func createKey(c *gin.Context) {
-	// TODO
-}
-func updateKey(c *gin.Context) {
-	// TODO
-}
-func updateTranslation(c *gin.Context) {
-	// TODO
-}
-func setRevised(c *gin.Context) {
-	// TODO
-}
+	var language model.Language
+	var json languageValidation
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	language.Name = json.Name
+	language.IsoCode = json.IsoCode
 
-func moveKey(c *gin.Context) {
-	// TODO
-}
-func addLanguage(c *gin.Context) {
-	// TODO
-}
-func setBaseLanguage(c *gin.Context) {
-	// TODO
-}
-
-func deleteKey(c *gin.Context) {
-	// TODO
-}
-func diffIOS(c *gin.Context) {
-	// TODO
-}
-func diffAndroid(c *gin.Context) {
-	// TODO
-}
-func diffExcel(c *gin.Context) {
-	// TODO
-}
-func exportIOS(c *gin.Context) {
-	// TODO
-}
-func exportAndroid(c *gin.Context) {
-	// TODO
-}
-func exportExcel(c *gin.Context) {
-	// TODO
+	if dbc := db.Create(&language); dbc.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
+		return
+	}
+	c.JSON(200, language)
 }

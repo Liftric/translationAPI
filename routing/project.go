@@ -101,3 +101,52 @@ func archiveProject(c *gin.Context) {
 		c.JSON(200, project)
 	}
 }
+
+type ProjectLanguageValidation struct {
+	Id      uint   `form:"id" json:"id" xml:"id"  binding:"required"`
+	IsoCode string `form:"languageCode" json:"languageCode" xml:"languageCode"  binding:"required"`
+}
+
+func addLanguageToProject(c *gin.Context) {
+	var json ProjectLanguageValidation
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var project model.Project
+	if err := db.Where("id = ?", json.Id).First(&project).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		var lang model.Language
+		if err := db.Where("iso_code = ?", json.IsoCode).First(&lang).Error; err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		}
+		db.Model(&project).Association("Languages").Append(lang)
+		db.Save(&project)
+		c.JSON(200, project)
+	}
+}
+
+func setBaseLanguage(c *gin.Context) {
+	var json ProjectLanguageValidation
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var project model.Project
+	if err := db.Where("id = ?", json.Id).First(&project).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		var baseLang model.Language
+		if err := db.Where("iso_code = ?", json.IsoCode).First(&baseLang).Error; err != nil {
+			c.AbortWithStatus(404)
+			fmt.Println(err)
+		}
+		project.BaseLanguage = baseLang
+		db.Save(&project)
+		c.JSON(200, project)
+	}
+}
