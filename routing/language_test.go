@@ -10,7 +10,7 @@ import (
 )
 
 func TestLanguagesRoute(t *testing.T) {
-	router := setupTestRouter()
+	router := setupTestEnvironment()
 	defer db.Close()
 
 	w := httptest.NewRecorder()
@@ -18,17 +18,18 @@ func TestLanguagesRoute(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, `[{"IsoCode":"en","Name":"English"},{"IsoCode":"de","Name":"German"}]`, w.Body.String())
 }
 
 func TestCreateLanguageRoute(t *testing.T) {
-	router := setupTestRouter()
+	router := setupTestEnvironment()
 	defer db.Close()
 
-	var jsonStr = []byte(`{"languageCode": "de", "name": "German"}`)
+	var jsonStr = []byte(`{"languageCode": "fr", "name": "French"}`)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("PUT", "/language", bytes.NewBuffer(jsonStr))
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 201, w.Code)
-	assert.Equal(t, `{"IsoCode":"de","Name":"German"}`, w.Body.String())
+	assert.Equal(t, `{"IsoCode":"fr","Name":"French"}`, w.Body.String())
 }

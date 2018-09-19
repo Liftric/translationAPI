@@ -7,10 +7,27 @@ import (
 	"preventis.io/translationApi/model"
 )
 
+type projectDTO struct {
+	Id           uint
+	Name         string
+	BaseLanguage model.Language
+	Languages    []model.Language
+}
+
 func getAllActiveProjects(c *gin.Context) {
 	var projects []model.Project
-	db.Where("archived = ?", false).Find(&projects)
-	c.JSON(200, projects)
+	db.Where("archived = ?", false).Preload("BaseLanguage").Preload("Languages").Find(&projects)
+	var result []projectDTO
+	result = []projectDTO{}
+	for _, e := range projects {
+		var languages = e.Languages
+		if languages == nil {
+			languages = []model.Language{}
+		}
+		p := projectDTO{e.ID, e.Name, e.BaseLanguage, languages}
+		result = append(result, p)
+	}
+	c.JSON(200, result)
 }
 
 func getAllArchivedProjects(c *gin.Context) {
@@ -30,13 +47,13 @@ func getProject(c *gin.Context) {
 	}
 }
 
-type ProjectValidation struct {
+type projectValidation struct {
 	Name    string `form:"name" json:"name" xml:"name"  binding:"required"`
 	IsoCode string `form:"baseLanguageCode" json:"baseLanguageCode" xml:"baseLanguageCode"  binding:"required"`
 }
 
 func createProject(c *gin.Context) {
-	var json ProjectValidation
+	var json projectValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -57,13 +74,13 @@ func createProject(c *gin.Context) {
 	c.JSON(201, project)
 }
 
-type ProjectRenameValidation struct {
+type projectRenameValidation struct {
 	Name string `form:"name" json:"name" xml:"name"  binding:"required"`
 }
 
 func renameProject(c *gin.Context) {
 	id := c.Param("id")
-	var json ProjectRenameValidation
+	var json projectRenameValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -79,13 +96,13 @@ func renameProject(c *gin.Context) {
 	}
 }
 
-type ProjectArchiveValidation struct {
+type projectArchiveValidation struct {
 	Archive bool `form:"archive" json:"archive" xml:"archive"  binding:"required"`
 }
 
 func archiveProject(c *gin.Context) {
 	id := c.Param("id")
-	var json ProjectArchiveValidation
+	var json projectArchiveValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -101,13 +118,13 @@ func archiveProject(c *gin.Context) {
 	}
 }
 
-type ProjectLanguageValidation struct {
+type projectLanguageValidation struct {
 	IsoCode string `form:"languageCode" json:"languageCode" xml:"languageCode"  binding:"required"`
 }
 
 func addLanguageToProject(c *gin.Context) {
 	id := c.Param("id")
-	var json ProjectLanguageValidation
+	var json projectLanguageValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -130,7 +147,7 @@ func addLanguageToProject(c *gin.Context) {
 
 func setBaseLanguage(c *gin.Context) {
 	id := c.Param("id")
-	var json ProjectLanguageValidation
+	var json projectLanguageValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

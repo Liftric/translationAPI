@@ -7,13 +7,13 @@ import (
 	"preventis.io/translationApi/model"
 )
 
-type StringKeyValidation struct {
+type stringKeyValidation struct {
 	ProjectId int    `form:"projectId" json:"projectId" xml:"projectId"  binding:"required"`
 	Key       string `form:"key" json:"key" xml:"key"  binding:"required"`
 }
 
 func createKey(c *gin.Context) {
-	var json StringKeyValidation
+	var json stringKeyValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -35,13 +35,13 @@ func createKey(c *gin.Context) {
 	c.Status(201)
 }
 
-type UpdateKeyValidation struct {
+type updateKeyValidation struct {
 	Key string `form:"key" json:"key" xml:"key"  binding:"required"`
 }
 
 func updateKey(c *gin.Context) {
 	id := c.Param("id")
-	var json StringKeyValidation
+	var json updateKeyValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -57,14 +57,14 @@ func updateKey(c *gin.Context) {
 	c.Status(200)
 }
 
-type TranslationValidation struct {
+type translationValidation struct {
 	KeyId       int    `form:"keyId" json:"keyId" xml:"keyId"  binding:"required"`
 	Translation string `form:"translation" json:"translation" xml:"translation"  binding:"required"`
 	Language    string `form:"languageCode" json:"languageCode" xml:"languageCode"  binding:"required"`
 }
 
 func createTranslation(c *gin.Context) {
-	var json TranslationValidation
+	var json translationValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -93,13 +93,13 @@ func createTranslation(c *gin.Context) {
 	c.Status(201)
 }
 
-type UpdateTranslationValidation struct {
+type updateTranslationValidation struct {
 	Translation string `form:"translation" json:"translation" xml:"translation"  binding:"required"`
 }
 
 func updateTranslation(c *gin.Context) {
 	id := c.Param("id")
-	var json UpdateTranslationValidation
+	var json updateTranslationValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

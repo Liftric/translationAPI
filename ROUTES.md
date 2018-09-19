@@ -5,6 +5,7 @@
 * display all active projects (with statistics)
 * display all archived projects
 * display all strings, statistics and config of a project
+* display all languages
 
 ## Create
 
