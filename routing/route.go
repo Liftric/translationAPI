@@ -24,17 +24,19 @@ func StartRouter(database *gorm.DB) {
 	// create language
 	r.PUT("/language", createLanguage)
 	// create key in project
-	r.PUT("/project/:id/key", createKey)
+	r.PUT("/key", createKey)
 	// change key
-	r.POST("/project/:id/key", updateKey)
+	r.POST("/key/:id", updateKey)
+	// create translation
+	r.PUT("/translation", createTranslation)
 	// change translation
-	r.POST("/project/:id/translation", updateTranslation)
+	r.POST("/translation/update/:id", updateTranslation)
 	// set revised for translation in a language
-	r.POST("/project/:id/revised/:key", setRevised)
+	r.POST("/translation/approve/:id", setApproved)
 	// change project name
 	r.POST("/projectName", renameProject)
 	// move key to another project
-	r.POST("/project/:id/moveKey", moveKey)
+	r.POST("/key/:id/move/:projectId", moveKey)
 	// add language to project
 	r.PUT("/project/:id/languages", addLanguageToProject)
 	// set base language of project
@@ -42,7 +44,7 @@ func StartRouter(database *gorm.DB) {
 	// archive project
 	r.DELETE("/project/:id", archiveProject)
 	// delete key
-	r.DELETE("/project/:id/:key", deleteKey)
+	r.DELETE("/key/:id", deleteKey)
 	// diff iOS strings file and db
 	r.POST("/project/:id/ios", diffIOS)
 	// diff android strings file and db
@@ -78,5 +80,5 @@ func createLanguage(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
 		return
 	}
-	c.JSON(200, language)
+	c.JSON(201, language)
 }

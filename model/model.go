@@ -13,29 +13,29 @@ type Project struct {
 	gorm.Model
 	Name              string   `gorm:"unique;not null"`
 	BaseLanguage      Language `gorm:"foreignkey:BaseLanguageRefer"`
-	BaseLanguageRefer uint
+	BaseLanguageRefer string
 	Languages         []Language `gorm:"many2many:project_languages;"`
 	Archived          bool
 }
 
 type Language struct {
-	gorm.Model
+	IsoCode string `gorm:"primary_key"`
 	Name    string `gorm:"unique;not null"`
-	IsoCode string `gorm:"unique;not null"`
 }
 
 type StringKey struct {
 	gorm.Model
-	Key           string
-	Language      Language `gorm:"foreignkey:LanguageRefer"`
-	LanguageRefer uint
-	Project       Project `gorm:"foreignkey:ProjectRefer"`
-	ProjectRefer  uint
+	Key          string
+	Project      Project `gorm:"foreignkey:ProjectRefer"`
+	ProjectRefer uint
 }
 
 type Translation struct {
 	gorm.Model
-	Translation string
-	Key         StringKey `gorm:"foreignkey:KeyRefer"`
-	KeyRefer    uint
+	Translation   string
+	Key           StringKey `gorm:"foreignkey:KeyRefer"`
+	KeyRefer      uint
+	Language      Language `gorm:"foreignkey:LanguageRefer"`
+	LanguageRefer string
+	Approved      bool `gorm:"default:'false'"`
 }

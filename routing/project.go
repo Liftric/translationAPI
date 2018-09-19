@@ -38,12 +38,13 @@ type ProjectValidation struct {
 }
 
 func createProject(c *gin.Context) {
-	var project model.Project
 	var json ProjectValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	var project model.Project
 	project.Name = json.Name
 	var baseLang model.Language
 	if err := db.Where("iso_code = ?", json.IsoCode).First(&baseLang).Error; err != nil {
@@ -55,7 +56,7 @@ func createProject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
 		return
 	}
-	c.JSON(200, project)
+	c.JSON(201, project)
 }
 
 type ProjectRenameValidation struct {
@@ -81,18 +82,18 @@ func renameProject(c *gin.Context) {
 }
 
 type ProjectArchiveValidation struct {
-	Id      uint `form:"id" json:"id" xml:"id"  binding:"required"`
 	Archive bool `form:"archive" json:"archive" xml:"archive"  binding:"required"`
 }
 
 func archiveProject(c *gin.Context) {
+	id := c.Param("id")
 	var json ProjectArchiveValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	var project model.Project
-	if err := db.Where("id = ?", json.Id).First(&project).Error; err != nil {
+	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	} else {
@@ -103,18 +104,18 @@ func archiveProject(c *gin.Context) {
 }
 
 type ProjectLanguageValidation struct {
-	Id      uint   `form:"id" json:"id" xml:"id"  binding:"required"`
 	IsoCode string `form:"languageCode" json:"languageCode" xml:"languageCode"  binding:"required"`
 }
 
 func addLanguageToProject(c *gin.Context) {
+	id := c.Param("id")
 	var json ProjectLanguageValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	var project model.Project
-	if err := db.Where("id = ?", json.Id).First(&project).Error; err != nil {
+	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	} else {
@@ -130,13 +131,14 @@ func addLanguageToProject(c *gin.Context) {
 }
 
 func setBaseLanguage(c *gin.Context) {
+	id := c.Param("id")
 	var json ProjectLanguageValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	var project model.Project
-	if err := db.Where("id = ?", json.Id).First(&project).Error; err != nil {
+	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	} else {
