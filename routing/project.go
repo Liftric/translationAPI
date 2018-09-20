@@ -74,6 +74,7 @@ func createProject(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
+	project.Languages = []model.Language{baseLang}
 
 	if dbc := db.Create(&project); dbc.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
@@ -177,6 +178,18 @@ func setBaseLanguage(c *gin.Context) {
 			return
 		}
 		project.BaseLanguage = baseLang
+
+		var containsLang = false
+		for _, lang := range project.Languages {
+			if lang.IsoCode == baseLang.IsoCode {
+				containsLang = true
+			}
+		}
+
+		if !containsLang {
+			project.Languages = append(project.Languages, baseLang)
+		}
+
 		db.Save(&project)
 		c.JSON(200, project)
 	}

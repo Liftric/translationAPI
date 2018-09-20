@@ -1,3 +1,5 @@
+// database package that contains models for the gorm library. Database connection can be acquired here and the database
+// gets initialized here.
 package model
 
 import (
@@ -8,6 +10,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
+// Connects to database, initializes the models in the database and returns a gorm database object
 func StartDB(dbDialect string, dbArgs string) *gorm.DB {
 	db, err := gorm.Open(dbDialect, dbArgs)
 	if err != nil {
@@ -17,6 +20,7 @@ func StartDB(dbDialect string, dbArgs string) *gorm.DB {
 	return db
 }
 
+// Registers the models in the database
 func InitDB(db *gorm.DB) {
 	db.AutoMigrate(&Language{})
 	db.AutoMigrate(&Project{})
@@ -34,11 +38,13 @@ type Project struct {
 	Identifiers       []StringIdentifier `gorm:"foreignkey:ProjectID"`
 }
 
+// Languages the strings can be translated in
 type Language struct {
 	IsoCode string `gorm:"primary_key"`
 	Name    string `gorm:"unique;not null"`
 }
 
+// Identifies the string, contains the different translations and corresponds to a project
 type StringIdentifier struct {
 	gorm.Model
 	Identifier   string        `gorm:"unique_index:idx_identifier_project"`
@@ -47,6 +53,7 @@ type StringIdentifier struct {
 	Translations []Translation `gorm:"foreignkey:StringIdentifierID"`
 }
 
+// Translation of a string in one language
 type Translation struct {
 	gorm.Model
 	Translation        string

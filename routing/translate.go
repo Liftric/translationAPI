@@ -90,20 +90,26 @@ func createTranslation(c *gin.Context) {
 	var translation model.Translation
 	translation.Translation = json.Translation
 	var key model.StringIdentifier
-	if err := db.Where("id = ?", json.KeyId).First(&key).Error; err != nil {
+	if err := db.Where("id = ?", json.KeyId).Preload("Project").Preload("Project.Languages").First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 		return
 	}
 	translation.Identifier = key
 
-	var lang model.Language
-	if err := db.Where("iso_code = ?", json.Language).First(&lang).Error; err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
+	var containsLang = false
+	for _, e := range key.Project.Languages {
+		if e.IsoCode == json.Language {
+			containsLang = true
+			translation.Language = e
+		}
+	}
+
+	if !containsLang {
+		c.AbortWithStatusJSON(404, gin.H{"error": "Project does not contain language, please add it first."})
+		fmt.Println("project does not contain language")
 		return
 	}
-	translation.Language = lang
 
 	if dbc := db.Create(&translation); dbc.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
