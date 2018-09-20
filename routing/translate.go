@@ -90,7 +90,7 @@ func createTranslation(c *gin.Context) {
 	translation.Identifier = key
 
 	var lang model.Language
-	if err := db.Where("IsoCode = ?", json.Language).First(&lang).Error; err != nil {
+	if err := db.Where("iso_code = ?", json.Language).First(&lang).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 		return
@@ -123,6 +123,7 @@ func updateTranslation(c *gin.Context) {
 		return
 	}
 	translation.Translation = json.Translation
+	translation.Approved = false
 	db.Save(&translation)
 	c.Status(200)
 }

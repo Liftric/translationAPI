@@ -13,6 +13,10 @@ func TestCreateIdentifierRoute(t *testing.T) {
 	router := setupTestEnvironment()
 	defer db.Close()
 
+	var keys []model.StringIdentifier
+	db.Where("Identifier = ? AND project_id = ?", "newIdentifier", 1).Find(&keys)
+	assert.Empty(t, keys)
+
 	var jsonStr = []byte(`{"projectId": 1, "identifier": "newIdentifier"}`)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("PUT", "/identifier", bytes.NewBuffer(jsonStr))
@@ -20,10 +24,8 @@ func TestCreateIdentifierRoute(t *testing.T) {
 
 	assert.Equal(t, 201, w.Code)
 
-	var key model.StringIdentifier
-	errors := db.Where("Identifier = ? AND project_id = ?", "newIdentifier", 1).First(&key).GetErrors()
-
-	assert.Empty(t, errors)
+	db.Where("Identifier = ? AND project_id = ?", "newIdentifier", 1).Find(&keys)
+	assert.NotEmpty(t, keys)
 
 	var jsonStr2 = []byte(`{"projectId": 100, "identifier": "newIdentifier"}`)
 	w2 := httptest.NewRecorder()
@@ -32,9 +34,8 @@ func TestCreateIdentifierRoute(t *testing.T) {
 
 	assert.Equal(t, 404, w2.Code)
 
-	var jsonStr3 = []byte(`{"projectId": 1, "identifier": "newIdentifier"}`)
 	w3 := httptest.NewRecorder()
-	req3, _ := http.NewRequest("PUT", "/identifier", bytes.NewBuffer(jsonStr3))
+	req3, _ := http.NewRequest("PUT", "/identifier", bytes.NewBuffer(jsonStr))
 	router.ServeHTTP(w3, req3)
 
 	assert.Equal(t, 409, w3.Code)
@@ -64,4 +65,94 @@ func TestUpdateIdentifier(t *testing.T) {
 	router.ServeHTTP(w2, req2)
 
 	assert.Equal(t, 404, w2.Code)
+}
+
+func TestCreateTranslation(t *testing.T) {
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var translations []model.Translation
+	db.Where("string_identifier_id = ? AND language_refer = ?", 1, "en").Find(&translations)
+	assert.Empty(t, translations)
+
+	var jsonStr = []byte(`{"keyId": 1, "translation": "testTranslation", "languageCode": "en"}`)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", "/translation", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 201, w.Code)
+
+	var translation model.Translation
+	db.Where("string_identifier_id = ? AND language_refer = ?", 1, "en").First(&translation)
+	assert.Equal(t, "testTranslation", translation.Translation)
+
+	req2, _ := http.NewRequest("PUT", "/translation", bytes.NewBuffer(jsonStr))
+	w2 := httptest.NewRecorder()
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 409, w.Code)
+
+	db.Where("string_identifier_id = ? AND language_refer = ?", 1, "en").Find(&translations)
+	assert.Equal(t, 1, len(translations))
+}
+
+func TestUpdateTranslation(t *testing.T) {
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var translation model.Translation
+	db.Where("id = ?", 1).First(&translation)
+
+	assert.NotEqual(t, "updatedTranslation", translation.Translation)
+
+	var jsonStr = []byte(`{"translation": "updatedTranslation"}`)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/translation/update/1", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w, req)
+
+	db.Where("id = ?", 1).First(&translation)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "updatedTranslation", translation.Translation)
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("PUT", "/translation/update/100", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 404, w2.Code)
+}
+
+func TestApproveTranslation(t *testing.T) {
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var translation model.Translation
+	db.Where("id = ?", 1).First(&translation)
+
+	assert.False(t, translation.Approved)
+
+	var jsonStr = []byte(`{"translation": "updatedTranslation"}`)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/translation/approve/1", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w, req)
+
+	db.Where("id = ?", 1).First(&translation)
+
+	assert.Equal(t, 200, w.Code)
+	assert.True(t, translation.Approved)
+
+	// test if approval gets revoked after changing translation
+	var jsonStr2 = []byte(`{"translation": "updatedTranslation"}`)
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("POST", "/translation/update/1", bytes.NewBuffer(jsonStr2))
+	router.ServeHTTP(w2, req2)
+
+	db.Where("id = ?", 1).First(&translation)
+	assert.False(t, translation.Approved)
+
+	w3 := httptest.NewRecorder()
+	req3, _ := http.NewRequest("PUT", "/translation/approve/100", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w3, req3)
+
+	assert.Equal(t, 404, w3.Code)
 }

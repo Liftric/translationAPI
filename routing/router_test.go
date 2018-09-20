@@ -25,6 +25,12 @@ func setupTestEnvironment() *gin.Engine {
 	db.Create(&key1)
 	db.Create(&key2)
 
+	translation1 := model.Translation{Translation: "translation1", Identifier: key1, Language: ger}
+	translation2 := model.Translation{Translation: "translation2", Identifier: key2, Language: ger, Approved: true}
+
+	db.Create(&translation1)
+	db.Create(&translation2)
+
 	router := setupRouter()
 	return router
 }
