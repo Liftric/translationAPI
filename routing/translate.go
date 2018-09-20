@@ -79,6 +79,14 @@ func createTranslation(c *gin.Context) {
 		return
 	}
 
+	var translations []model.Translation
+	db.Where("string_identifier_id = ? AND language_refer = ?", json.KeyId, json.Language).Find(&translations)
+	if len(translations) > 0 {
+		c.AbortWithStatusJSON(409, gin.H{"error": "Translation already present, use update route."})
+		fmt.Println("translation already present")
+		return
+	}
+
 	var translation model.Translation
 	translation.Translation = json.Translation
 	var key model.StringIdentifier

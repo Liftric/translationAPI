@@ -90,7 +90,7 @@ func TestCreateTranslation(t *testing.T) {
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req2)
 
-	assert.Equal(t, 409, w.Code)
+	assert.Equal(t, 409, w2.Code)
 
 	db.Where("string_identifier_id = ? AND language_refer = ?", 1, "en").Find(&translations)
 	assert.Equal(t, 1, len(translations))
@@ -152,6 +152,75 @@ func TestApproveTranslation(t *testing.T) {
 
 	w3 := httptest.NewRecorder()
 	req3, _ := http.NewRequest("PUT", "/translation/approve/100", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w3, req3)
+
+	assert.Equal(t, 404, w3.Code)
+}
+
+func TestMoveKey(t *testing.T) {
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var key model.StringIdentifier
+	db.First(&key)
+
+	assert.Equal(t, uint(1), key.ProjectID)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/identifier/1/move/2", nil)
+	router.ServeHTTP(w, req)
+
+	db.First(&key)
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, uint(2), key.ProjectID)
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("POST", "/identifier/1/move/2", nil)
+	router.ServeHTTP(w2, req2)
+
+	db.First(&key)
+	assert.Equal(t, 200, w2.Code)
+	assert.Equal(t, uint(2), key.ProjectID)
+
+	w3 := httptest.NewRecorder()
+	req3, _ := http.NewRequest("POST", "/identifier/100/move/2", nil)
+	router.ServeHTTP(w3, req3)
+
+	assert.Equal(t, 404, w3.Code)
+
+	w4 := httptest.NewRecorder()
+	req4, _ := http.NewRequest("POST", "/identifier/1/move/200", nil)
+	router.ServeHTTP(w4, req4)
+
+	assert.Equal(t, 404, w4.Code)
+}
+
+func TestDeleteKey(t *testing.T) {
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var key model.StringIdentifier
+	db.First(&key)
+	assert.Equal(t, uint(1), key.ID)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/identifier/1", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	var key2 model.StringIdentifier
+	db.First(&key2)
+	assert.NotEqual(t, uint(1), key2.ID)
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("DELETE", "/identifier/1", nil)
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 404, w2.Code)
+
+	w3 := httptest.NewRecorder()
+	req3, _ := http.NewRequest("DELETE", "/identifier/100", nil)
 	router.ServeHTTP(w3, req3)
 
 	assert.Equal(t, 404, w3.Code)

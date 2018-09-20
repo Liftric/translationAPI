@@ -51,8 +51,8 @@ type Translation struct {
 	gorm.Model
 	Translation        string
 	Identifier         StringIdentifier `gorm:"foreignkey:StringIdentifierID"`
-	StringIdentifierID uint             `gorm:"not null"`
+	StringIdentifierID uint             `gorm:"not null;unique_index:idx_identifier_language"`
 	Language           Language         `gorm:"foreignkey:LanguageRefer"`
-	LanguageRefer      string           `gorm:"not null"`
+	LanguageRefer      string           `gorm:"not null;unique_index:idx_identifier_language"`
 	Approved           bool             `gorm:"default:'false'"`
 }
