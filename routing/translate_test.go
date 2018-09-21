@@ -61,7 +61,7 @@ func TestUpdateIdentifier(t *testing.T) {
 	assert.Equal(t, "updatedIdentifier", key.Identifier)
 
 	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("PUT", "/identifier/100", bytes.NewBuffer(jsonStr))
+	req2, _ := http.NewRequest("POST", "/identifier/100", bytes.NewBuffer(jsonStr))
 	router.ServeHTTP(w2, req2)
 
 	assert.Equal(t, 404, w2.Code)

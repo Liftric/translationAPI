@@ -66,14 +66,23 @@ func createProject(c *gin.Context) {
 		return
 	}
 
+	var projects []model.Project
+	db.Where("Name = ?", json.Name).Find(&projects)
+	if len(projects) > 0 {
+		c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error": "Project with same name already exists"})
+		fmt.Println("Project with same name already exists")
+		return
+	}
+
 	var project model.Project
 	project.Name = json.Name
 	var baseLang model.Language
 	if err := db.Where("iso_code = ?", json.IsoCode).First(&baseLang).Error; err != nil {
-		c.AbortWithStatus(404)
+		c.AbortWithStatus(http.StatusNotFound)
 		fmt.Println(err)
 		return
 	}
+	project.BaseLanguage = baseLang
 	project.Languages = []model.Language{baseLang}
 
 	if dbc := db.Create(&project); dbc.Error != nil {
@@ -141,11 +150,16 @@ func addLanguageToProject(c *gin.Context) {
 		return
 	}
 	var project model.Project
-	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
+	if err := db.Where("id = ?", id).Preload("Languages").First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 		return
 	} else {
+		if containsLanguage(json.IsoCode, project) {
+			c.AbortWithStatusJSON(409, gin.H{"error": "Project already contains language"})
+			fmt.Println("language already present in project")
+			return
+		}
 		var lang model.Language
 		if err := db.Where("iso_code = ?", json.IsoCode).First(&lang).Error; err != nil {
 			c.AbortWithStatus(404)
@@ -156,6 +170,16 @@ func addLanguageToProject(c *gin.Context) {
 		db.Save(&project)
 		c.JSON(200, project)
 	}
+}
+
+func containsLanguage(lang string, project model.Project) bool {
+	var containsLanguage = false
+	for _, e := range project.Languages {
+		if e.IsoCode == lang {
+			containsLanguage = true
+		}
+	}
+	return containsLanguage
 }
 
 func setBaseLanguage(c *gin.Context) {

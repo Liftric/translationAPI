@@ -25,11 +25,11 @@ func setupRouter() *gin.Engine {
 		// create project
 		projectRoutes.PUT("", createProject)
 		// add language to project
-		projectRoutes.PUT("/:id/languages", addLanguageToProject)
+		projectRoutes.POST("/:id/languages", addLanguageToProject)
 		// set base language of project
 		projectRoutes.POST("/:id/baseLanguage", setBaseLanguage)
 		// archive project
-		projectRoutes.DELETE("/:id", archiveProject)
+		projectRoutes.POST("/:id/archive", archiveProject)
 		// change project name
 		projectRoutes.POST("/:id/name", renameProject)
 		// diff iOS strings file and db

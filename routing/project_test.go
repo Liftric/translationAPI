@@ -1,9 +1,11 @@
 package routing
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"preventis.io/translationApi/model"
 	"testing"
 )
 
@@ -36,11 +38,69 @@ func TestGetProject(t *testing.T) {
 }
 
 func TestCreateProject(t *testing.T) {
-	// TODO
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var projects []model.Project
+	db.Where("Name = ?", "newProject").Find(&projects)
+	assert.Empty(t, projects)
+
+	var jsonStr = []byte(`{"name": "newProject", "baseLanguageCode": "en"}`)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", "/project", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 201, w.Code)
+
+	db.Where("Name = ?", "newProject").Find(&projects)
+	assert.Equal(t, 1, len(projects))
+
+	var project model.Project
+	db.Where("Name = ?", "newProject").Preload("Languages").First(&project)
+	assert.Equal(t, "en", project.BaseLanguageRefer)
+	assert.Equal(t, "en", project.Languages[0].IsoCode)
+	assert.Equal(t, 1, len(project.Languages))
+
+	var jsonStr2 = []byte(`{"name": "newProject2", "baseLanguageCode": "xy"}`)
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("PUT", "/project", bytes.NewBuffer(jsonStr2))
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 404, w2.Code)
+
+	w3 := httptest.NewRecorder()
+	req3, _ := http.NewRequest("PUT", "/project", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w3, req3)
+
+	assert.Equal(t, 409, w3.Code)
+	db.Where("Name = ?", "newProject").Find(&projects)
+	assert.Equal(t, 1, len(projects))
 }
 
 func TestRenameProject(t *testing.T) {
-	// TODO
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var project model.Project
+	db.Where("id = ?", 1).First(&project)
+
+	assert.NotEqual(t, "updatedProject", project.Name)
+
+	var jsonStr = []byte(`{"name": "updatedProject"}`)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/project/1/name", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w, req)
+
+	db.Where("id = ?", 1).First(&project)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "updatedProject", project.Name)
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("POST", "/project/100/name", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 404, w2.Code)
 }
 
 func TestArchiveProject(t *testing.T) {
@@ -48,9 +108,62 @@ func TestArchiveProject(t *testing.T) {
 }
 
 func TestAddLanguageToProject(t *testing.T) {
-	// TODO
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var project model.Project
+	db.Preload("Languages").First(&project)
+	assert.False(t, containsLanguage("es", project))
+
+	var jsonStr = []byte(`{"languageCode": "es"}`)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/project/1/languages", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+
+	var project2 model.Project
+	db.Preload("Languages").First(&project2)
+	assert.True(t, containsLanguage("es", project2))
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("POST", "/project/1/languages", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w2, req2)
+	assert.Equal(t, 409, w2.Code)
 }
 
 func TestSetBaseLanguage(t *testing.T) {
-	// TODO
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var project model.Project
+	db.First(&project)
+
+	assert.Equal(t, "en", project.BaseLanguageRefer)
+
+	var jsonStr = []byte(`{"languageCode": "de"}`)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/project/1/baseLanguage", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w, req)
+
+	db.First(&project)
+	assert.Equal(t, 200, w.Code)
+
+	db.First(&project)
+
+	assert.Equal(t, "de", project.BaseLanguageRefer)
+
+	var jsonStr2 = []byte(`{"languageCode": "xy"}`)
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("POST", "/project/1/baseLanguage", bytes.NewBuffer(jsonStr2))
+	router.ServeHTTP(w2, req2)
+
+	db.First(&project)
+	assert.Equal(t, 404, w2.Code)
+	assert.Equal(t, "de", project.BaseLanguageRefer)
+
+	w3 := httptest.NewRecorder()
+	req3, _ := http.NewRequest("POST", "/project/100/baseLanguage", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w3, req3)
+
+	assert.Equal(t, 404, w3.Code)
 }

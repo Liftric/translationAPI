@@ -10,8 +10,10 @@ func setupTestEnvironment() *gin.Engine {
 
 	eng := model.Language{IsoCode: "en", Name: "English"}
 	ger := model.Language{IsoCode: "de", Name: "German"}
+	es := model.Language{IsoCode: "es", Name: "Spanish"}
 	db.Create(&eng)
 	db.Create(&ger)
+	db.Create(&es)
 
 	proj1 := model.Project{Name: "Shared", BaseLanguage: eng, Languages: []model.Language{ger, eng}}
 	proj2 := model.Project{Name: "Base", BaseLanguage: ger, Languages: []model.Language{ger}}
