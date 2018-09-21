@@ -33,15 +33,15 @@ func setupRouter() *gin.Engine {
 		// change project name
 		projectRoutes.POST("/:id/name", renameProject)
 		// diff iOS strings file and db
-		projectRoutes.POST("/:id/ios", diffIOS)
+		projectRoutes.POST("/:id/ios/:lang", diffIOS)
 		// diff android strings file and db
-		projectRoutes.POST("/:id/android", diffAndroid)
+		projectRoutes.POST("/:id/android/:lang", diffAndroid)
 		// diff excel file and db
 		projectRoutes.POST("/:id/excel", diffExcel)
 		// export ios strings
-		projectRoutes.GET("/:id/ios", exportIOS)
+		projectRoutes.GET("/:id/ios/:lang", exportIOS)
 		// export android strings
-		projectRoutes.GET("/:id/android", exportAndroid)
+		projectRoutes.GET("/:id/android/:lang", exportAndroid)
 		// export to excel
 		projectRoutes.GET("/:id/excel", exportExcel)
 	}
