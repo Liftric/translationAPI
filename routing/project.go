@@ -42,15 +42,52 @@ func convertProjectListToDTO(projects []model.Project) []simpleProjectDTO {
 	return result
 }
 
+type projectDTO struct {
+	Id           uint
+	Name         string
+	BaseLanguage model.Language
+	Languages    []model.Language
+	Identifiers  []identifierDTO
+}
+
+type identifierDTO struct {
+	Id           uint
+	Identifier   string
+	Translations []translationDTO
+}
+
+type translationDTO struct {
+	Translation string
+	Language    string
+	Approved    bool
+}
+
 func getProject(c *gin.Context) {
 	id := c.Param("id")
 	var project model.Project
-	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
+	if err := db.Where("id = ?", id).
+		Preload("Languages").
+		Preload("BaseLanguage").
+		Preload("Identifiers").
+		Preload("Identifiers.Translations").
+		First(&project).
+		Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 		return
 	} else {
-		c.JSON(200, project)
+		var identifiers []identifierDTO
+		for _, e := range project.Identifiers {
+			var translations []translationDTO
+			for _, t := range e.Translations {
+				translation := translationDTO{Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved}
+				translations = append(translations, translation)
+			}
+			i := identifierDTO{Id: e.ID, Identifier: e.Identifier, Translations: translations}
+			identifiers = append(identifiers, i)
+		}
+		res := projectDTO{Id: project.ID, Name: project.Name, BaseLanguage: project.BaseLanguage, Languages: project.Languages, Identifiers: identifiers}
+		c.JSON(200, res)
 	}
 }
 

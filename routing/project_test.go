@@ -34,7 +34,15 @@ func TestArchivedProjectsRoute(t *testing.T) {
 }
 
 func TestGetProject(t *testing.T) {
-	// TODO
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/project/1", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, `{"Id":1,"Name":"Shared","BaseLanguage":{"IsoCode":"en","Name":"English"},"Languages":[{"IsoCode":"de","Name":"German"},{"IsoCode":"en","Name":"English"}],"Identifiers":[{"Id":1,"Identifier":"key1","Translations":[{"Translation":"translation1","Language":"de","Approved":false}]}]}`, w.Body.String())
 }
 
 func TestCreateProject(t *testing.T) {
