@@ -56,7 +56,3 @@ func TestExportIos(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, "\"key1\" = \"translation1\";\\n\"key2\" = \"translation2\";\\n", w.Body.String())
 }
-
-func TestImportIos(t *testing.T) {
-	// TODO
-}

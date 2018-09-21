@@ -21,7 +21,7 @@
 * change project name
 * move key to another project
 * add language to project
-* set base language of project?
+* set base language of project
 
 ## Delete
 
@@ -32,12 +32,12 @@
 
 The import routes should give back the diff. The web frontend should then do the crud calls.
 
-* import iOS strings file
+* import iOS strings file - not yet implemented
 * import android strings xml
-* import excel file
+* import excel file - not yet implemented
 
 ## Export
 
 * export to iOS strings file
 * export to android strings xml
-* export to excel file
+* export to excel file - not yet implemented
