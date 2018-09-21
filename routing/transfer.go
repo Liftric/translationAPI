@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"preventis.io/translationApi/model"
 )
@@ -12,9 +13,70 @@ import (
 func diffIOS(c *gin.Context) {
 	// TODO
 }
-func diffAndroid(c *gin.Context) {
-	// TODO
+
+type diffDTO struct {
+	Identifier string
+	Create     bool
+	Update     bool
 }
+
+func diffAndroid(c *gin.Context) {
+	id := c.Param("id")
+	lang := c.Param("lang")
+	var resource androidResource
+	if err := c.ShouldBindWith(&resource, binding.XML); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var project model.Project
+	if err := db.Where("id = ?", id).
+		Preload("Languages").
+		Preload("Identifiers").
+		Preload("Identifiers.Translations").
+		First(&project).
+		Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+		return
+	} else {
+		if !containsLanguage(lang, project) {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Language not present in project"})
+			println("language not in project")
+			return
+		}
+		var diffs []diffDTO
+		for _, e := range resource.Strings {
+			check := checkIdtentifier(e.Identifier, e.Translation, lang, project)
+			create := false
+			update := false
+			if check == 1 {
+				create = true
+			} else if check == 2 {
+				update = true
+			}
+			diffs = append(diffs, diffDTO{Identifier: e.Identifier, Create: create, Update: update})
+		}
+		c.JSON(http.StatusOK, diffs)
+	}
+}
+
+func checkIdtentifier(identifier string, translation string, lang string, project model.Project) int {
+	for _, i := range project.Identifiers {
+		if i.Identifier == identifier {
+			for _, t := range i.Translations {
+				if t.LanguageRefer == lang {
+					if t.Translation == translation {
+						return 0
+					} else {
+						return 2
+					}
+				}
+			}
+		}
+	}
+	return 1
+}
+
 func diffExcel(c *gin.Context) {
 	// TODO
 }
@@ -49,7 +111,7 @@ func exportIOS(c *gin.Context) {
 }
 
 type androidResource struct {
-	XMLName xml.Name        `xml:"resources"`
+	XMLName xml.Name        `xml:"resources" binding:"required"`
 	Strings []androidString `xml:"string"`
 }
 

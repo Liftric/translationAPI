@@ -23,15 +23,19 @@ func setupTestEnvironment() *gin.Engine {
 	db.Create(&archivedProj)
 
 	key1 := model.StringIdentifier{Identifier: "key1", Project: proj1}
-	key2 := model.StringIdentifier{Identifier: "key2", Project: proj2}
+	key2 := model.StringIdentifier{Identifier: "key2", Project: proj1}
+	key3 := model.StringIdentifier{Identifier: "key2", Project: proj2}
 	db.Create(&key1)
 	db.Create(&key2)
+	db.Create(&key3)
 
 	translation1 := model.Translation{Translation: "translation1", Identifier: key1, Language: ger}
-	translation2 := model.Translation{Translation: "translation2", Identifier: key2, Language: ger, Approved: true}
+	translation2 := model.Translation{Translation: "translation2", Identifier: key2, Language: ger}
+	translation3 := model.Translation{Translation: "translation2", Identifier: key3, Language: ger, Approved: true}
 
 	db.Create(&translation1)
 	db.Create(&translation2)
+	db.Create(&translation3)
 
 	router := setupRouter()
 	return router
