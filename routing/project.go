@@ -115,24 +115,15 @@ func renameProject(c *gin.Context) {
 	}
 }
 
-type projectArchiveValidation struct {
-	Archive bool `form:"archive" json:"archive" xml:"archive"  binding:"required"`
-}
-
 func archiveProject(c *gin.Context) {
 	id := c.Param("id")
-	var json projectArchiveValidation
-	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
 	var project model.Project
 	if err := db.Where("id = ?", id).First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 		return
 	} else {
-		project.Archived = json.Archive
+		project.Archived = true
 		db.Save(&project)
 		c.JSON(200, project)
 	}

@@ -18,7 +18,7 @@ func TestLanguagesRoute(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, `[{"IsoCode":"en","Name":"English"},{"IsoCode":"de","Name":"German"}]`, w.Body.String())
+	assert.Equal(t, `[{"IsoCode":"en","Name":"English"},{"IsoCode":"de","Name":"German"},{"IsoCode":"es","Name":"Spanish"}]`, w.Body.String())
 }
 
 func TestCreateLanguageRoute(t *testing.T) {

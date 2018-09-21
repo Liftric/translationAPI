@@ -104,7 +104,37 @@ func TestRenameProject(t *testing.T) {
 }
 
 func TestArchiveProject(t *testing.T) {
-	// TODO
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var project model.Project
+	db.First(&project)
+
+	assert.False(t, project.Archived)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/project/1", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+
+	db.First(&project)
+	assert.True(t, project.Archived)
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("DELETE", "/project/1", nil)
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 200, w2.Code)
+
+	db.First(&project)
+	assert.True(t, project.Archived)
+
+	w4 := httptest.NewRecorder()
+	req4, _ := http.NewRequest("DELETE", "/project/100", nil)
+	router.ServeHTTP(w4, req4)
+
+	assert.Equal(t, 404, w4.Code)
 }
 
 func TestAddLanguageToProject(t *testing.T) {
