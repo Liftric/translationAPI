@@ -1,6 +1,7 @@
 package routing
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 )
@@ -9,6 +10,9 @@ var db *gorm.DB
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:3000"}
+	r.Use(cors.New(config))
 
 	projectsRoutes := r.Group("/projects")
 	{
