@@ -16,28 +16,30 @@ type simpleProjectDTO struct {
 
 func getAllActiveProjects(c *gin.Context) {
 	var projects []model.Project
-	db.Where("archived = ?", false).Preload("BaseLanguage").Preload("Languages").Find(&projects)
-	result := convertProjectListToDTO(projects)
+	db.Preload("BaseLanguage").Preload("Languages").Find(&projects)
+	result := convertProjectListToDTO(projects, false)
 	c.JSON(200, result)
 }
 
 func getAllArchivedProjects(c *gin.Context) {
 	var projects []model.Project
-	db.Where("archived = ?", true).Find(&projects)
-	result := convertProjectListToDTO(projects)
+	db.Find(&projects)
+	result := convertProjectListToDTO(projects, true)
 	c.JSON(200, result)
 }
 
-func convertProjectListToDTO(projects []model.Project) []simpleProjectDTO {
+func convertProjectListToDTO(projects []model.Project, archived bool) []simpleProjectDTO {
 	var result []simpleProjectDTO
 	result = []simpleProjectDTO{}
 	for _, e := range projects {
-		var languages = e.Languages
-		if languages == nil {
-			languages = []model.Language{}
+		if archived == e.Archived {
+			var languages = e.Languages
+			if languages == nil {
+				languages = []model.Language{}
+			}
+			p := simpleProjectDTO{e.ID, e.Name, e.BaseLanguage, languages}
+			result = append(result, p)
 		}
-		p := simpleProjectDTO{e.ID, e.Name, e.BaseLanguage, languages}
-		result = append(result, p)
 	}
 	return result
 }
@@ -76,7 +78,7 @@ func getProject(c *gin.Context) {
 		fmt.Println(err)
 		return
 	} else {
-		var identifiers []identifierDTO
+		identifiers := []identifierDTO{}
 		for _, e := range project.Identifiers {
 			var translations []translationDTO
 			for _, t := range e.Translations {
@@ -121,6 +123,7 @@ func createProject(c *gin.Context) {
 	}
 	project.BaseLanguage = baseLang
 	project.Languages = []model.Language{baseLang}
+	project.Archived = false
 
 	if dbc := db.Create(&project); dbc.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
