@@ -62,4 +62,13 @@ type Translation struct {
 	Language           Language         `gorm:"foreignkey:LanguageRefer"`
 	LanguageRefer      string           `gorm:"not null;unique_index:idx_identifier_language"`
 	Approved           bool             `gorm:"default:'false'"`
+	Revisions          []Revision       `gorm:"foreignkey:TranslationID"`
+}
+
+type Revision struct {
+	gorm.Model
+	RevisionTranslation string
+	Translation         Translation `gorm:"foreignkey:TranslationID"`
+	TranslationID       uint        `gorm:"not null`
+	Approved            bool        `gorm:"default:'false'"`
 }

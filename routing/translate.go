@@ -112,6 +112,8 @@ func createTranslation(c *gin.Context) {
 	}
 
 	if dbc := db.Create(&translation); dbc.Error != nil {
+		revision := model.Revision{RevisionTranslation: translation.Translation, Approved: translation.Approved, Translation: translation}
+		db.Create(&revision)
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
 		return
 	}
@@ -139,6 +141,8 @@ func updateTranslation(c *gin.Context) {
 	translation.Translation = json.Translation
 	translation.Approved = false
 	db.Save(&translation)
+	revision := model.Revision{RevisionTranslation: translation.Translation, Approved: translation.Approved, Translation: translation}
+	db.Create(&revision)
 	c.Status(200)
 }
 func setApproved(c *gin.Context) {
@@ -151,6 +155,10 @@ func setApproved(c *gin.Context) {
 	} else {
 		translation.Approved = true
 		db.Save(&translation)
+		var revision model.Revision
+		db.Where("TranslationID = ?", translation.ID).Order("CreatedAt").Last(&revision)
+		revision.Approved = translation.Approved
+		db.Save(&revision)
 		c.Status(200)
 	}
 }

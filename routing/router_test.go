@@ -37,6 +37,14 @@ func setupTestEnvironment() *gin.Engine {
 	db.Create(&translation2)
 	db.Create(&translation3)
 
+	revision1 := model.Revision{Translation: translation1, RevisionTranslation: translation1.Translation, Approved: translation1.Approved}
+	revision2 := model.Revision{Translation: translation2, RevisionTranslation: translation2.Translation, Approved: translation2.Approved}
+	revision3 := model.Revision{Translation: translation3, RevisionTranslation: translation3.Translation, Approved: translation3.Approved}
+
+	db.Create(&revision1)
+	db.Create(&revision2)
+	db.Create(&revision3)
+
 	router := setupRouter()
 	return router
 }
