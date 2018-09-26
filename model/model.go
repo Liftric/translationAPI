@@ -69,6 +69,6 @@ type Revision struct {
 	gorm.Model
 	RevisionTranslation string
 	Translation         Translation `gorm:"foreignkey:TranslationID"`
-	TranslationID       uint        `gorm:"not null`
+	TranslationID       uint        `gorm:"not null"`
 	Approved            bool        `gorm:"default:'false'"`
 }
