@@ -131,9 +131,8 @@ func TestApproveTranslation(t *testing.T) {
 
 	assert.False(t, translation.Approved)
 
-	var jsonStr = []byte(`{"translation": "updatedTranslation"}`)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/translation/approve/1", bytes.NewBuffer(jsonStr))
+	req, _ := http.NewRequest("POST", "/translation/approve/1", nil)
 	router.ServeHTTP(w, req)
 
 	db.Where("id = ?", 1).First(&translation)
@@ -142,16 +141,49 @@ func TestApproveTranslation(t *testing.T) {
 	assert.True(t, translation.Approved)
 
 	// test if approval gets revoked after changing translation
-	var jsonStr2 = []byte(`{"translation": "updatedTranslation"}`)
 	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("POST", "/translation/update/1", bytes.NewBuffer(jsonStr2))
+	req2, _ := http.NewRequest("POST", "/translation/approve/1", nil)
 	router.ServeHTTP(w2, req2)
 
 	db.Where("id = ?", 1).First(&translation)
-	assert.False(t, translation.Approved)
+	assert.True(t, translation.Approved)
 
 	w3 := httptest.NewRecorder()
-	req3, _ := http.NewRequest("PUT", "/translation/approve/100", bytes.NewBuffer(jsonStr))
+	req3, _ := http.NewRequest("PUT", "/translation/approve/100", nil)
+	router.ServeHTTP(w3, req3)
+
+	assert.Equal(t, 404, w3.Code)
+}
+
+func TestToggleImprovementNeeded(t *testing.T) {
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var translation model.Translation
+	db.Where("id = ?", 1).First(&translation)
+
+	assert.False(t, translation.ImprovementNeeded)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/translation/improvement/1", nil)
+	router.ServeHTTP(w, req)
+
+	db.Where("id = ?", 1).First(&translation)
+
+	assert.Equal(t, 200, w.Code)
+	assert.True(t, translation.ImprovementNeeded)
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("POST", "/translation/improvement/1", nil)
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 200, w2.Code)
+
+	db.Where("id = ?", 1).First(&translation)
+	assert.False(t, translation.ImprovementNeeded)
+
+	w3 := httptest.NewRecorder()
+	req3, _ := http.NewRequest("PUT", "/translation/improvement/100", nil)
 	router.ServeHTTP(w3, req3)
 
 	assert.Equal(t, 404, w3.Code)

@@ -21,6 +21,7 @@ func createLanguage(c *gin.Context) {
 	var json languageValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		println(err.Error())
 		return
 	}
 

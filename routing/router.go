@@ -58,6 +58,8 @@ func setupRouter() *gin.Engine {
 		translationRoutes.POST("/update/:id", updateTranslation)
 		// set revised for translation in a language
 		translationRoutes.POST("/approve/:id", setApproved)
+		// toggle improvement needed
+		translationRoutes.POST("/improvement/:id", toggleImprovementNeeded)
 	}
 
 	identifierRoutes := r.Group("/identifier")

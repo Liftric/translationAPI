@@ -59,9 +59,10 @@ type identifierDTO struct {
 }
 
 type translationDTO struct {
-	Translation string
-	Language    string
-	Approved    bool
+	Translation       string
+	Language          string
+	Approved          bool
+	ImprovementNeeded bool
 }
 
 func getProject(c *gin.Context) {
@@ -82,7 +83,7 @@ func getProject(c *gin.Context) {
 		for _, e := range project.Identifiers {
 			var translations []translationDTO
 			for _, t := range e.Translations {
-				translation := translationDTO{Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved}
+				translation := translationDTO{Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved, ImprovementNeeded: t.ImprovementNeeded}
 				translations = append(translations, translation)
 			}
 			i := identifierDTO{Id: e.ID, Identifier: e.Identifier, Translations: translations}
@@ -102,6 +103,7 @@ func createProject(c *gin.Context) {
 	var json projectValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		println(err.Error())
 		return
 	}
 

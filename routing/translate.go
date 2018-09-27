@@ -140,6 +140,7 @@ func updateTranslation(c *gin.Context) {
 	}
 	translation.Translation = json.Translation
 	translation.Approved = false
+	translation.ImprovementNeeded = false
 	db.Save(&translation)
 	revision := model.Revision{RevisionTranslation: translation.Translation, Approved: translation.Approved, Translation: translation}
 	db.Create(&revision)
@@ -159,6 +160,20 @@ func setApproved(c *gin.Context) {
 		db.Where("TranslationID = ?", translation.ID).Order("CreatedAt").Last(&revision)
 		revision.Approved = translation.Approved
 		db.Save(&revision)
+		c.Status(200)
+	}
+}
+
+func toggleImprovementNeeded(c *gin.Context) {
+	id := c.Param("id")
+	var translation model.Translation
+	if err := db.Where("id = ?", id).First(&translation).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+		return
+	} else {
+		translation.ImprovementNeeded = !translation.ImprovementNeeded
+		db.Save(&translation)
 		c.Status(200)
 	}
 }
