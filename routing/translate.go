@@ -72,7 +72,7 @@ type translationValidation struct {
 	Language    string `form:"languageCode" json:"languageCode" xml:"languageCode"  binding:"required"`
 }
 
-func createTranslation(c *gin.Context) {
+func upsertTranslation(c *gin.Context) {
 	var json translationValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -80,10 +80,22 @@ func createTranslation(c *gin.Context) {
 	}
 
 	var translations []model.Translation
-	db.Where("string_identifier_id = ? AND language_refer = ?", json.KeyId, json.Language).Find(&translations)
+	db.Where("string_identifier_id = ? AND language_refer = ?", json.KeyId, json.Language).Preload("Language").Find(&translations)
 	if len(translations) > 0 {
-		c.AbortWithStatusJSON(409, gin.H{"error": "Translation already present, use update route."})
-		fmt.Println("translation already present")
+		translation := translations[0]
+		if translation.Translation == json.Translation {
+			translationDTO := translationDTO{Translation: translation.Translation, Language: translation.Language.IsoCode, Approved: translation.Approved, ImprovementNeeded: translation.ImprovementNeeded}
+			c.JSON(http.StatusOK, translationDTO)
+			return
+		}
+		translation.Translation = json.Translation
+		translation.Approved = false
+		translation.ImprovementNeeded = false
+		db.Save(&translation)
+		revision := model.Revision{RevisionTranslation: translation.Translation, Approved: translation.Approved, Translation: translation}
+		db.Create(&revision)
+		translationDTO := translationDTO{Translation: translation.Translation, Language: translation.Language.IsoCode, Approved: translation.Approved, ImprovementNeeded: translation.ImprovementNeeded}
+		c.JSON(http.StatusOK, translationDTO)
 		return
 	}
 
@@ -117,35 +129,10 @@ func createTranslation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
 		return
 	}
-	c.Status(201)
+	translationDTO := translationDTO{Translation: translation.Translation, Language: translation.Language.IsoCode, Approved: translation.Approved, ImprovementNeeded: translation.ImprovementNeeded}
+	c.JSON(http.StatusCreated, translationDTO)
 }
 
-type updateTranslationValidation struct {
-	Translation string `form:"translation" json:"translation" xml:"translation"  binding:"required"`
-}
-
-func updateTranslation(c *gin.Context) {
-	id := c.Param("id")
-	var json updateTranslationValidation
-	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var translation model.Translation
-	if err := db.Where("id = ?", id).First(&translation).Error; err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-		return
-	}
-	translation.Translation = json.Translation
-	translation.Approved = false
-	translation.ImprovementNeeded = false
-	db.Save(&translation)
-	revision := model.Revision{RevisionTranslation: translation.Translation, Approved: translation.Approved, Translation: translation}
-	db.Create(&revision)
-	c.Status(200)
-}
 func setApproved(c *gin.Context) {
 	id := c.Param("id")
 	var translation model.Translation

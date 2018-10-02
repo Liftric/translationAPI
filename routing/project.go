@@ -81,7 +81,7 @@ func getProject(c *gin.Context) {
 	} else {
 		identifiers := []identifierDTO{}
 		for _, e := range project.Identifiers {
-			var translations []translationDTO
+			translations := []translationDTO{}
 			for _, t := range e.Translations {
 				translation := translationDTO{Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved, ImprovementNeeded: t.ImprovementNeeded}
 				translations = append(translations, translation)

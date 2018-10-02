@@ -81,7 +81,7 @@ func TestCreateTranslation(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 201, w.Code)
-
+	assert.Equal(t, `{"Translation":"testTranslation","Language":"en","Approved":false,"ImprovementNeeded":false}`, w.Body.String())
 	var translation model.Translation
 	db.Where("string_identifier_id = ? AND language_refer = ?", 1, "en").First(&translation)
 	assert.Equal(t, "testTranslation", translation.Translation)
@@ -90,36 +90,11 @@ func TestCreateTranslation(t *testing.T) {
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req2)
 
-	assert.Equal(t, 409, w2.Code)
+	assert.Equal(t, 200, w2.Code)
+	assert.Equal(t, `{"Translation":"testTranslation","Language":"en","Approved":false,"ImprovementNeeded":false}`, w2.Body.String())
 
 	db.Where("string_identifier_id = ? AND language_refer = ?", 1, "en").Find(&translations)
 	assert.Equal(t, 1, len(translations))
-}
-
-func TestUpdateTranslation(t *testing.T) {
-	router := setupTestEnvironment()
-	defer db.Close()
-
-	var translation model.Translation
-	db.Where("id = ?", 1).First(&translation)
-
-	assert.NotEqual(t, "updatedTranslation", translation.Translation)
-
-	var jsonStr = []byte(`{"translation": "updatedTranslation"}`)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/translation/update/1", bytes.NewBuffer(jsonStr))
-	router.ServeHTTP(w, req)
-
-	db.Where("id = ?", 1).First(&translation)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "updatedTranslation", translation.Translation)
-
-	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("PUT", "/translation/update/100", bytes.NewBuffer(jsonStr))
-	router.ServeHTTP(w2, req2)
-
-	assert.Equal(t, 404, w2.Code)
 }
 
 func TestApproveTranslation(t *testing.T) {

@@ -52,10 +52,8 @@ func setupRouter() *gin.Engine {
 
 	translationRoutes := r.Group("/translation")
 	{
-		// create translation
-		translationRoutes.PUT("", createTranslation)
-		// change translation
-		translationRoutes.POST("/update/:id", updateTranslation)
+		// create or update translation
+		translationRoutes.PUT("", upsertTranslation)
 		// set revised for translation in a language
 		translationRoutes.POST("/approve/:id", setApproved)
 		// toggle improvement needed
