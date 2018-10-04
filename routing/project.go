@@ -79,19 +79,22 @@ func getProject(c *gin.Context) {
 		fmt.Println(err)
 		return
 	} else {
-		identifiers := []identifierDTO{}
-		for _, e := range project.Identifiers {
-			translations := []translationDTO{}
-			for _, t := range e.Translations {
-				translation := translationDTO{Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved, ImprovementNeeded: t.ImprovementNeeded}
-				translations = append(translations, translation)
-			}
-			i := identifierDTO{Id: e.ID, Identifier: e.Identifier, Translations: translations}
-			identifiers = append(identifiers, i)
-		}
-		res := projectDTO{Id: project.ID, Name: project.Name, BaseLanguage: project.BaseLanguage, Languages: project.Languages, Identifiers: identifiers}
-		c.JSON(200, res)
+		c.JSON(200, projectToDTO(project))
 	}
+}
+
+func projectToDTO(project model.Project) projectDTO {
+	identifiers := []identifierDTO{}
+	for _, e := range project.Identifiers {
+		translations := []translationDTO{}
+		for _, t := range e.Translations {
+			translation := translationDTO{Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved, ImprovementNeeded: t.ImprovementNeeded}
+			translations = append(translations, translation)
+		}
+		i := identifierDTO{Id: e.ID, Identifier: e.Identifier, Translations: translations}
+		identifiers = append(identifiers, i)
+	}
+	return projectDTO{Id: project.ID, Name: project.Name, BaseLanguage: project.BaseLanguage, Languages: project.Languages, Identifiers: identifiers}
 }
 
 type projectValidation struct {
@@ -131,7 +134,7 @@ func createProject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
 		return
 	}
-	c.JSON(201, project)
+	c.JSON(201, projectToDTO(project))
 }
 
 type projectRenameValidation struct {
@@ -153,7 +156,7 @@ func renameProject(c *gin.Context) {
 	} else {
 		project.Name = json.Name
 		db.Save(&project)
-		c.JSON(200, project)
+		c.JSON(200, projectToDTO(project))
 	}
 }
 
@@ -167,7 +170,7 @@ func archiveProject(c *gin.Context) {
 	} else {
 		project.Archived = true
 		db.Save(&project)
-		c.JSON(200, project)
+		c.JSON(200, projectToDTO(project))
 	}
 }
 
@@ -201,7 +204,7 @@ func addLanguageToProject(c *gin.Context) {
 		}
 		db.Model(&project).Association("Languages").Append(lang)
 		db.Save(&project)
-		c.JSON(200, project)
+		c.JSON(200, projectToDTO(project))
 	}
 }
 
@@ -248,6 +251,6 @@ func setBaseLanguage(c *gin.Context) {
 		}
 
 		db.Save(&project)
-		c.JSON(200, project)
+		c.JSON(200, projectToDTO(project))
 	}
 }
