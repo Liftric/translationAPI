@@ -22,7 +22,12 @@ func createIdentifier(c *gin.Context) {
 	var key model.StringIdentifier
 	key.Identifier = json.Identifier
 	var project model.Project
-	if err := db.Where("id = ?", json.ProjectId).First(&project).Error; err != nil {
+	if err := db.Where("id = ?", json.ProjectId).
+		Preload("Languages").
+		Preload("BaseLanguage").
+		Preload("Identifiers").
+		Preload("Identifiers.Translations").
+		First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 		return
@@ -40,7 +45,17 @@ func createIdentifier(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
 		return
 	}
-	c.Status(201)
+
+	c.JSON(201, identifierToDTO(key))
+}
+
+func identifierToDTO(key model.StringIdentifier) identifierDTO {
+	translations := []translationDTO{}
+	for _, t := range key.Translations {
+		translation := translationDTO{Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved, ImprovementNeeded: t.ImprovementNeeded}
+		translations = append(translations, translation)
+	}
+	return identifierDTO{Id: key.ID, Identifier: key.Identifier, Translations: translations}
 }
 
 type updateIdentifierValidation struct {
@@ -56,14 +71,14 @@ func updateIdentifier(c *gin.Context) {
 	}
 
 	var key model.StringIdentifier
-	if err := db.Where("id = ?", id).First(&key).Error; err != nil {
+	if err := db.Where("id = ?", id).Preload("Translations").First(&key).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 		return
 	}
 	key.Identifier = json.Key
 	db.Save(&key)
-	c.Status(200)
+	c.JSON(200, identifierToDTO(key))
 }
 
 type translationValidation struct {

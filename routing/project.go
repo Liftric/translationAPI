@@ -86,13 +86,7 @@ func getProject(c *gin.Context) {
 func projectToDTO(project model.Project) projectDTO {
 	identifiers := []identifierDTO{}
 	for _, e := range project.Identifiers {
-		translations := []translationDTO{}
-		for _, t := range e.Translations {
-			translation := translationDTO{Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved, ImprovementNeeded: t.ImprovementNeeded}
-			translations = append(translations, translation)
-		}
-		i := identifierDTO{Id: e.ID, Identifier: e.Identifier, Translations: translations}
-		identifiers = append(identifiers, i)
+		identifiers = append(identifiers, identifierToDTO(e))
 	}
 	return projectDTO{Id: project.ID, Name: project.Name, BaseLanguage: project.BaseLanguage, Languages: project.Languages, Identifiers: identifiers}
 }
