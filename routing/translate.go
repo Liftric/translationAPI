@@ -83,7 +83,7 @@ func updateIdentifier(c *gin.Context) {
 
 type translationValidation struct {
 	KeyId       int    `form:"keyId" json:"keyId" xml:"keyId"  binding:"required"`
-	Translation string `form:"translation" json:"translation" xml:"translation"  binding:"required"`
+	Translation string `form:"translation" json:"translation" xml:"translation"`
 	Language    string `form:"languageCode" json:"languageCode" xml:"languageCode"  binding:"required"`
 }
 

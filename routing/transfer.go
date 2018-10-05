@@ -16,8 +16,10 @@ func diffIOS(c *gin.Context) {
 
 type diffDTO struct {
 	Identifier     string
+	IdentifierId   uint
 	Create         bool
 	Update         bool
+	ToChange       bool
 	TranslationNew string
 	TranslationOld string
 }
@@ -48,7 +50,7 @@ func diffAndroid(c *gin.Context) {
 		}
 		var diffs []diffDTO
 		for _, e := range resource.Strings {
-			check, translationOld := checkIdtentifier(e.Identifier, e.Translation, lang, project)
+			check, translationOld, identifierId := checkIdtentifier(e.Identifier, e.Translation, lang, project)
 			create := false
 			update := false
 			if check == 1 {
@@ -56,12 +58,15 @@ func diffAndroid(c *gin.Context) {
 			} else if check == 2 {
 				update = true
 			}
+			toChange := check > 0
 			diffs = append(
 				diffs,
 				diffDTO{
 					Identifier:     e.Identifier,
+					IdentifierId:   identifierId,
 					Create:         create,
 					Update:         update,
+					ToChange:       toChange,
 					TranslationOld: translationOld,
 					TranslationNew: e.Translation})
 		}
@@ -69,21 +74,22 @@ func diffAndroid(c *gin.Context) {
 	}
 }
 
-func checkIdtentifier(identifier string, translation string, lang string, project model.Project) (int, string) {
+func checkIdtentifier(identifier string, translation string, lang string, project model.Project) (int, string, uint) {
 	for _, i := range project.Identifiers {
 		if i.Identifier == identifier {
 			for _, t := range i.Translations {
 				if t.LanguageRefer == lang {
 					if t.Translation == translation {
-						return 0, t.Translation
+						return 0, t.Translation, i.ID
 					} else {
-						return 2, t.Translation
+						return 2, t.Translation, i.ID
 					}
 				}
 			}
+			return 2, "", i.ID
 		}
 	}
-	return 1, ""
+	return 1, "", 0
 }
 
 func diffExcel(c *gin.Context) {
