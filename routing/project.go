@@ -180,7 +180,12 @@ func addLanguageToProject(c *gin.Context) {
 		return
 	}
 	var project model.Project
-	if err := db.Where("id = ?", id).Preload("Languages").First(&project).Error; err != nil {
+	if err := db.Where("id = ?", id).
+		Preload("Languages").
+		Preload("BaseLanguage").
+		Preload("Identifiers").
+		Preload("Identifiers.Translations").
+		First(&project).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 		return

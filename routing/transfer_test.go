@@ -30,7 +30,7 @@ func TestImportAndroid(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, `[{"Identifier":"key1","Create":false,"Update":false},{"Identifier":"key2","Create":false,"Update":true},{"Identifier":"key3","Create":true,"Update":false}]`, w.Body.String())
+	assert.Equal(t, `[{"Identifier":"key1","Create":false,"Update":false,"TranslationNew":"translation1","TranslationOld":"translation1"},{"Identifier":"key2","Create":false,"Update":true,"TranslationNew":"newTranslation2","TranslationOld":"translation2"},{"Identifier":"key3","Create":true,"Update":false,"TranslationNew":"translation3","TranslationOld":""}]`, w.Body.String())
 
 	w2 := httptest.NewRecorder()
 	req2, _ := http.NewRequest("POST", "/project/1/android/es", bytes.NewBuffer(xmlStr))
