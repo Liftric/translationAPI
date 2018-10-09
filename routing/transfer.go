@@ -2,6 +2,7 @@ package routing
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/xml"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -117,10 +118,12 @@ func exportIOS(c *gin.Context) {
 		resList := getAndroidExportStrings(project, lang)
 		res := ""
 		for _, e := range resList {
-			res += fmt.Sprintf(`"%s" = "%s";\n`, e.Identifier, e.Translation)
+			res += fmt.Sprintf(`"%s" = "%s";`, e.Identifier, e.Translation)
+			res += fmt.Sprintf("\n")
 		}
 
-		// not using c.XML because of formatting
+		c.Header("Content-Disposition", `attachment; filename="Localizable.strings"`)
+
 		c.String(http.StatusOK, res)
 	}
 }
@@ -145,7 +148,7 @@ func exportAndroid(c *gin.Context) {
 		Preload("Identifiers.Translations").
 		First(&project).
 		Error; err != nil {
-		c.AbortWithStatus(404)
+		c.AbortWithStatus(http.StatusNotFound)
 		fmt.Println(err)
 		return
 	} else {
@@ -162,6 +165,9 @@ func exportAndroid(c *gin.Context) {
 		if err := enc.Encode(resource); err != nil {
 			panic(err)
 		}
+
+		c.Header("Content-Type", "text/xml")
+		c.Header("Content-Disposition", `attachment; filename="strings.xml"`)
 
 		// not using c.XML because of formatting
 		c.String(http.StatusOK, w.String())
@@ -181,6 +187,54 @@ func getAndroidExportStrings(project model.Project, lang string) []androidString
 	return resList
 }
 
-func exportExcel(c *gin.Context) {
-	// TODO
+func exportCsv(c *gin.Context) {
+	id := c.Param("id")
+	var project model.Project
+	if err := db.Where("id = ?", id).
+		Preload("Languages").
+		Preload("Identifiers").
+		Preload("Identifiers.Translations").
+		First(&project).
+		Error; err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		fmt.Println(err)
+		return
+	} else {
+		var resList [][]string
+		for _, e := range project.Identifiers {
+			var line []string
+			line = append(line, e.Identifier)
+			for _, l := range project.Languages {
+				appended := false
+				for _, t := range e.Translations {
+					if t.LanguageRefer == l.IsoCode {
+						line = append(line, t.Translation)
+						appended = true
+					}
+				}
+				if !appended {
+					line = append(line, "")
+				}
+			}
+			resList = append(resList, line)
+		}
+		var header []string
+		header = append(header, "Identifier")
+		for _, l := range project.Languages {
+			header = append(header, l.Name)
+		}
+		w := &bytes.Buffer{}
+		enc := csv.NewWriter(w)
+		enc.UseCRLF = true
+		enc.Write(header)
+		if err := enc.WriteAll(resList); err != nil {
+			panic(err)
+		}
+		enc.Flush()
+
+		c.Header("Content-Type", "text/csv")
+		c.Header("Content-Disposition", `attachment; filename="strings.csv"`)
+
+		c.String(http.StatusOK, w.String())
+	}
 }

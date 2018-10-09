@@ -54,5 +54,17 @@ func TestExportIos(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "\"key1\" = \"translation1\";\\n\"key2\" = \"translation2\";\\n", w.Body.String())
+	assert.Equal(t, "\"key1\" = \"translation1\";\n\"key2\" = \"translation2\";\n", w.Body.String())
+}
+
+func TestExportCsv(t *testing.T) {
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/project/1/csv", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "Identifier,German,English\r\nkey1,translation1,\r\nkey2,translation2,\r\n", w.Body.String())
 }

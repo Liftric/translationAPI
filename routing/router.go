@@ -48,7 +48,7 @@ func setupRouter() *gin.Engine {
 		// export android strings
 		projectRoutes.GET("/:id/android/:lang", exportAndroid)
 		// export to excel
-		projectRoutes.GET("/:id/excel", exportExcel)
+		projectRoutes.GET("/:id/csv", exportCsv)
 	}
 
 	translationRoutes := r.Group("/translation")
