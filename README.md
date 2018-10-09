@@ -15,5 +15,6 @@ This project is configured to run inside docker. The database connection can be 
 * DATABASE_NAME (if database type is sqlite3 this is the path to the database file)
 * DATABASE_USER
 * DATABASE_PASSWORD
+* DATABASE_SSL (for mysql and postgres connection, default is false)
 
-There should be a docker image in the gitlab registry.
+Easiest way of running is using a docker image.
