@@ -4,6 +4,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"os"
 )
 
 var db *gorm.DB
@@ -77,6 +78,13 @@ func setupRouter() *gin.Engine {
 	// get languages
 	r.GET("/languages", getLanguages)
 	return r
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
 
 func StartRouter(database *gorm.DB) {
