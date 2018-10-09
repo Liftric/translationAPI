@@ -26,6 +26,7 @@ func InitDB(db *gorm.DB) {
 	db.AutoMigrate(&Project{})
 	db.AutoMigrate(&StringIdentifier{})
 	db.AutoMigrate(&Translation{})
+	db.AutoMigrate(&Revision{})
 }
 
 type Project struct {
