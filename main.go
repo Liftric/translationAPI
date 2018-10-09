@@ -34,7 +34,7 @@ func getDbArgs(dbDialect string) string {
 		return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local&tls=%s", dbUser, dbPassword, dbHost, dbPort, dbDatabase, dbSSL)
 	} else if dbDialect == "postgres" {
 		if dbSSL == "" {
-			dbSSL = "disabled"
+			dbSSL = "disable"
 		}
 		return fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", dbHost, dbPort, dbUser, dbDatabase, dbPassword, dbSSL)
 	}

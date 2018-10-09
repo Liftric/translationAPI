@@ -15,6 +15,7 @@ This project is configured to run inside docker. The database connection can be 
 * DATABASE_NAME (if database type is sqlite3 this is the path to the database file)
 * DATABASE_USER
 * DATABASE_PASSWORD
-* DATABASE_SSL (for mysql and postgres connection, default is disabled/false)
+* DATABASE_SSL (for mysql and postgres connection, default is disable/false)
+* FRONTEND_URL (necessary for cors, default http://localhost:3000 for local development)
 
 Easiest way of running is using a docker image.

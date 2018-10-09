@@ -11,7 +11,7 @@ var db *gorm.DB
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000"}
+	config.AllowOrigins = []string{getEnv("FRONTEND_URL", "http://localhost:3000")}
 	r.Use(cors.New(config))
 
 	projectsRoutes := r.Group("/projects")
