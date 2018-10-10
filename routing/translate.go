@@ -52,7 +52,7 @@ func createIdentifier(c *gin.Context) {
 func identifierToDTO(key model.StringIdentifier) identifierDTO {
 	translations := []translationDTO{}
 	for _, t := range key.Translations {
-		translation := translationDTO{Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved, ImprovementNeeded: t.ImprovementNeeded}
+		translation := translationDTO{Id: t.ID, Translation: t.Translation, Language: t.LanguageRefer, Approved: t.Approved, ImprovementNeeded: t.ImprovementNeeded}
 		translations = append(translations, translation)
 	}
 	return identifierDTO{Id: key.ID, Identifier: key.Identifier, Translations: translations}
@@ -99,7 +99,7 @@ func upsertTranslation(c *gin.Context) {
 	if len(translations) > 0 {
 		translation := translations[0]
 		if translation.Translation == json.Translation {
-			translationDTO := translationDTO{Translation: translation.Translation, Language: translation.Language.IsoCode, Approved: translation.Approved, ImprovementNeeded: translation.ImprovementNeeded}
+			translationDTO := translationDTO{Id: translation.ID, Translation: translation.Translation, Language: translation.Language.IsoCode, Approved: translation.Approved, ImprovementNeeded: translation.ImprovementNeeded}
 			c.JSON(http.StatusOK, translationDTO)
 			return
 		}
@@ -109,7 +109,7 @@ func upsertTranslation(c *gin.Context) {
 		db.Save(&translation)
 		revision := model.Revision{RevisionTranslation: translation.Translation, Approved: translation.Approved, Translation: translation}
 		db.Create(&revision)
-		translationDTO := translationDTO{Translation: translation.Translation, Language: translation.Language.IsoCode, Approved: translation.Approved, ImprovementNeeded: translation.ImprovementNeeded}
+		translationDTO := translationDTO{Id: translation.ID, Translation: translation.Translation, Language: translation.Language.IsoCode, Approved: translation.Approved, ImprovementNeeded: translation.ImprovementNeeded}
 		c.JSON(http.StatusOK, translationDTO)
 		return
 	}
@@ -144,7 +144,7 @@ func upsertTranslation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})
 		return
 	}
-	translationDTO := translationDTO{Translation: translation.Translation, Language: translation.Language.IsoCode, Approved: translation.Approved, ImprovementNeeded: translation.ImprovementNeeded}
+	translationDTO := translationDTO{Id: translation.ID, Translation: translation.Translation, Language: translation.Language.IsoCode, Approved: translation.Approved, ImprovementNeeded: translation.ImprovementNeeded}
 	c.JSON(http.StatusCreated, translationDTO)
 }
 

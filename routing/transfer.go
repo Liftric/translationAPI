@@ -233,7 +233,7 @@ func exportCsv(c *gin.Context) {
 		enc.Flush()
 
 		c.Header("Content-Type", "text/csv")
-		c.Header("Content-Disposition", `attachment; filename="strings.csv"`)
+		c.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="%s.csv"`, project.Name))
 
 		c.String(http.StatusOK, w.String())
 	}

@@ -59,6 +59,7 @@ type identifierDTO struct {
 }
 
 type translationDTO struct {
+	Id                uint
 	Translation       string
 	Language          string
 	Approved          bool
