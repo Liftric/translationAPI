@@ -81,7 +81,7 @@ func TestCreateTranslation(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 201, w.Code)
-	assert.Equal(t, `{"Translation":"testTranslation","Language":"en","Approved":false,"ImprovementNeeded":false}`, w.Body.String())
+	assert.Equal(t, `{"Id":4,"Translation":"testTranslation","Language":"en","Approved":false,"ImprovementNeeded":false}`, w.Body.String())
 	var translation model.Translation
 	db.Where("string_identifier_id = ? AND language_refer = ?", 1, "en").First(&translation)
 	assert.Equal(t, "testTranslation", translation.Translation)
@@ -91,7 +91,7 @@ func TestCreateTranslation(t *testing.T) {
 	router.ServeHTTP(w2, req2)
 
 	assert.Equal(t, 200, w2.Code)
-	assert.Equal(t, `{"Translation":"testTranslation","Language":"en","Approved":false,"ImprovementNeeded":false}`, w2.Body.String())
+	assert.Equal(t, `{"Id":4,"Translation":"testTranslation","Language":"en","Approved":false,"ImprovementNeeded":false}`, w2.Body.String())
 
 	db.Where("string_identifier_id = ? AND language_refer = ?", 1, "en").Find(&translations)
 	assert.Equal(t, 1, len(translations))
