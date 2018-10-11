@@ -8,7 +8,9 @@ You can check out the different routes of the API [here](ROUTES.md).
 
 ## Running
 
-This project is configured to run inside docker. The database connection can be configured using the following environment variables:
+For running the api a database is necessary. If you don't specify a database, it will create a sqlite database in `/tmp`.
+To configure the database connection, the following environment variables are used:
+
 * DATABASE_TYPE (sqlite3, mysql or postgres)
 * DATABASE_HOST
 * DATABASE_PORT
@@ -18,4 +20,5 @@ This project is configured to run inside docker. The database connection can be 
 * DATABASE_SSL (for mysql and postgres connection, default is disable/false)
 * FRONTEND_URL (necessary for cors, default http://localhost:3000 for local development)
 
-Easiest way of running is using a docker image.
+Easiest way of deploying is running it in a container. 
+For building a container image you can have a look in the [gitlab-ci.yml](gitlab-ci.yml).
