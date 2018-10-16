@@ -13,6 +13,7 @@ func setupRouter() *gin.Engine {
 	r := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{getEnv("FRONTEND_URL", "http://localhost:3000")}
+	config.AllowMethods = []string{"GET", "PUT", "POST", "DELETE"}
 	r.Use(cors.New(config))
 
 	projectsRoutes := r.Group("/projects")
