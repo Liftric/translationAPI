@@ -186,17 +186,32 @@ func moveKey(c *gin.Context) {
 
 	var project model.Project
 	if err := db.Where("id = ?", projectId).First(&project).Error; err != nil {
-		c.AbortWithStatus(404)
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Project not found"})
 		fmt.Println(err)
 		return
 	}
 
 	var key model.StringIdentifier
 	if err := db.Where("id = ?", id).First(&key).Error; err != nil {
-		c.AbortWithStatus(404)
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Identifier not found"})
 		fmt.Println(err)
 		return
 	}
+
+	if key.ProjectID == project.ID {
+		c.AbortWithStatusJSON(http.StatusNotModified, gin.H{"error": "Not moving, identifier is already part of project"})
+		fmt.Println("Not moving, identifier is already part of project")
+		return
+	}
+
+	var existingKeys []model.StringIdentifier
+	db.Where("identifier = ? AND project_id = ?", key.Identifier, project.ID).Find(&existingKeys)
+	if len(existingKeys) > 0 {
+		c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error": "Identifier with same name already exists in project"})
+		fmt.Println("already existing key")
+		return
+	}
+
 	key.Project = project
 	db.Save(&key)
 	c.Status(200)

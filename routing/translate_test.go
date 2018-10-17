@@ -186,7 +186,7 @@ func TestMoveKey(t *testing.T) {
 	router.ServeHTTP(w2, req2)
 
 	db.First(&key)
-	assert.Equal(t, 200, w2.Code)
+	assert.Equal(t, 304, w2.Code)
 	assert.Equal(t, uint(2), key.ProjectID)
 
 	w3 := httptest.NewRecorder()
@@ -200,6 +200,12 @@ func TestMoveKey(t *testing.T) {
 	router.ServeHTTP(w4, req4)
 
 	assert.Equal(t, 404, w4.Code)
+
+	w5 := httptest.NewRecorder()
+	req5, _ := http.NewRequest("POST", "/identifier/2/move/2", nil)
+	router.ServeHTTP(w5, req5)
+
+	assert.Equal(t, 409, w5.Code)
 }
 
 func TestDeleteKey(t *testing.T) {
