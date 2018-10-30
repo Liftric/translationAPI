@@ -19,8 +19,6 @@ func createIdentifier(c *gin.Context) {
 		return
 	}
 
-	var key model.StringIdentifier
-	key.Identifier = json.Identifier
 	var project model.Project
 	if err := db.Where("id = ?", json.ProjectId).
 		Preload("Languages").
@@ -32,14 +30,26 @@ func createIdentifier(c *gin.Context) {
 		fmt.Println(err)
 		return
 	}
-	key.Project = project
 
 	var existingKeys []model.StringIdentifier
-	db.Where("Identifier = ? AND project_id = ?", "newIdentifier", 1).Find(&existingKeys)
+	db.Where("Identifier = ? AND project_id = ?", json.Identifier, project.ID).Find(&existingKeys)
 	if len(existingKeys) > 0 {
 		c.Status(409)
 		return
 	}
+
+	var deletedKey model.StringIdentifier
+	if err := db.Unscoped().Where("Identifier = ? AND project_id = ?", json.Identifier, project.ID).First(&deletedKey).Error; err == nil {
+		deletedKey.Model.DeletedAt = nil
+		db.Unscoped().Save(deletedKey)
+		fmt.Println("reactivated already deleted identifier")
+		c.JSON(http.StatusOK, identifierToDTO(deletedKey))
+		return
+	}
+
+	var key model.StringIdentifier
+	key.Identifier = json.Identifier
+	key.Project = project
 
 	if dbc := db.Create(&key); dbc.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": dbc.Error.Error()})

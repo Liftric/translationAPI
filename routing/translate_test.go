@@ -39,6 +39,24 @@ func TestCreateIdentifierRoute(t *testing.T) {
 	router.ServeHTTP(w3, req3)
 
 	assert.Equal(t, 409, w3.Code)
+
+	w4 := httptest.NewRecorder()
+	req4, _ := http.NewRequest("DELETE", "/identifier/1", nil)
+	router.ServeHTTP(w4, req4)
+
+	var keys2 []model.StringIdentifier
+	db.Where("Identifier = ? AND project_id = ?", "key1", 1).Find(&keys2)
+	assert.Empty(t, keys2)
+
+	var jsonStr3 = []byte(`{"projectId": 1, "identifier": "key1"}`)
+	w5 := httptest.NewRecorder()
+	req5, _ := http.NewRequest("PUT", "/identifier", bytes.NewBuffer(jsonStr3))
+	router.ServeHTTP(w5, req5)
+
+	assert.Equal(t, 200, w5.Code)
+
+	db.Where("Identifier = ? AND project_id = ?", "key1", 1).Find(&keys2)
+	assert.NotEmpty(t, keys2)
 }
 
 func TestUpdateIdentifier(t *testing.T) {
