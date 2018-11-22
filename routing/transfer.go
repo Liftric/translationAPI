@@ -238,3 +238,30 @@ func exportCsv(c *gin.Context) {
 		c.String(http.StatusOK, w.String())
 	}
 }
+
+
+func exportJSON(c *gin.Context) {
+	id := c.Param("id")
+	var project model.Project
+	if err := db.Where("id = ?", id).
+		Preload("Languages").
+		Preload("Identifiers").
+		Preload("Identifiers.Translations").
+		First(&project).
+		Error; err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		fmt.Println(err)
+		return
+	} else {
+		var languageMap = map[string]map[string]string{}
+		for _, l := range project.Languages {
+			languageMap[l.IsoCode] = map[string]string{}
+		}
+		for _, e := range project.Identifiers {
+			for _, t := range e.Translations {
+				languageMap[t.LanguageRefer][e.Identifier] = t.Translation
+			}
+		}
+		c.JSON(http.StatusOK, languageMap)
+	}
+}
