@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"preventis.io/translationApi/model"
+	"strings"
 )
 
 func diffIOS(c *gin.Context) {
@@ -118,7 +119,7 @@ func exportIOS(c *gin.Context) {
 		resList := getAndroidExportStrings(project, lang)
 		res := ""
 		for _, e := range resList {
-			res += fmt.Sprintf(`"%s" = "%s";`, e.Identifier, e.Translation)
+			res += fmt.Sprintf(`"%s" = "%s";`, e.Identifier, strings.Replace(e.Translation, "\"", "\\\"", -1))
 			res += fmt.Sprintf("\n")
 		}
 
@@ -238,7 +239,6 @@ func exportCsv(c *gin.Context) {
 		c.String(http.StatusOK, w.String())
 	}
 }
-
 
 func exportJSON(c *gin.Context) {
 	id := c.Param("id")

@@ -17,7 +17,7 @@ func TestExportAndroid(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "<resources>\n  <string name=\"key1\">translation1</string>\n  <string name=\"key2\">translation2</string>\n</resources>", w.Body.String())
+	assert.Equal(t, "<resources>\n  <string name=\"key1\">translation1</string>\n  <string name=\"key2\">&#34;translation2&#34;</string>\n</resources>", w.Body.String())
 }
 
 func TestImportAndroid(t *testing.T) {
@@ -30,7 +30,7 @@ func TestImportAndroid(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, `[{"Identifier":"key1","IdentifierId":1,"Create":false,"Update":false,"ToChange":false,"TranslationNew":"translation1","TranslationOld":"translation1"},{"Identifier":"key2","IdentifierId":2,"Create":false,"Update":true,"ToChange":true,"TranslationNew":"newTranslation2","TranslationOld":"translation2"},{"Identifier":"key3","IdentifierId":0,"Create":true,"Update":false,"ToChange":true,"TranslationNew":"translation3","TranslationOld":""}]`, w.Body.String())
+	assert.Equal(t, `[{"Identifier":"key1","IdentifierId":1,"Create":false,"Update":false,"ToChange":false,"TranslationNew":"translation1","TranslationOld":"translation1"},{"Identifier":"key2","IdentifierId":2,"Create":false,"Update":true,"ToChange":true,"TranslationNew":"newTranslation2","TranslationOld":"\"translation2\""},{"Identifier":"key3","IdentifierId":0,"Create":true,"Update":false,"ToChange":true,"TranslationNew":"translation3","TranslationOld":""}]`, w.Body.String())
 
 	w2 := httptest.NewRecorder()
 	req2, _ := http.NewRequest("POST", "/project/1/android/es", bytes.NewBuffer(xmlStr))
@@ -54,7 +54,7 @@ func TestExportIos(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "\"key1\" = \"translation1\";\n\"key2\" = \"translation2\";\n", w.Body.String())
+	assert.Equal(t, "\"key1\" = \"translation1\";\n\"key2\" = \"\\\"translation2\\\"\";\n", w.Body.String())
 }
 
 func TestExportCsv(t *testing.T) {
@@ -66,7 +66,7 @@ func TestExportCsv(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "Identifier,German,English\r\nkey1,translation1,\r\nkey2,translation2,\r\n", w.Body.String())
+	assert.Equal(t, "Identifier,German,English\r\nkey1,translation1,\r\nkey2,\"\"\"translation2\"\"\",\r\n", w.Body.String())
 }
 
 func TestExportJson(t *testing.T) {
@@ -78,5 +78,5 @@ func TestExportJson(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "{\"de\":{\"key1\":\"translation1\",\"key2\":\"translation2\"},\"en\":{}}", w.Body.String())
+	assert.Equal(t, "{\"de\":{\"key1\":\"translation1\",\"key2\":\"\\\"translation2\\\"\"},\"en\":{}}", w.Body.String())
 }
