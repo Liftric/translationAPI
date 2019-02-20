@@ -180,7 +180,7 @@ func getAndroidExportStrings(project model.Project, lang string) []androidString
 	for _, e := range project.Identifiers {
 		for _, t := range e.Translations {
 			if t.LanguageRefer == lang {
-				translation := androidString{Identifier: e.Identifier, Translation: t.Translation}
+				translation := androidString{Identifier: e.Identifier, Translation: strings.Replace(t.Translation, "'", "\\'", -1)}
 				resList = append(resList, translation)
 			}
 		}
