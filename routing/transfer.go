@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"preventis.io/translationApi/model"
+	"sort"
 	"strings"
 )
 
@@ -185,6 +186,9 @@ func getAndroidExportStrings(project model.Project, lang string) []androidString
 			}
 		}
 	}
+	sort.Slice(resList, func(i, j int) bool {
+		return resList[i].Identifier < resList[j].Identifier
+	})
 	return resList
 }
 
