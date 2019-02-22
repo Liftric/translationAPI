@@ -1,4 +1,4 @@
-FROM golang:alpine
+FROM golang:1-alpine
 
 COPY bin/translationApi /go/bin/translationApi
 
