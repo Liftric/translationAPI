@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"io"
+	"log"
 	"net/http"
 	"preventis.io/translationApi/model"
 	"sort"
@@ -96,7 +98,62 @@ func checkIdtentifier(identifier string, translation string, lang string, projec
 }
 
 func diffExcel(c *gin.Context) {
-	// TODO
+	id := c.Param("id")
+	lang := c.Param("lang")
+
+	var project model.Project
+	if err := db.Where("id = ?", id).
+		Preload("Languages").
+		Preload("Identifiers").
+		Preload("Identifiers.Translations").
+		First(&project).
+		Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+		return
+	} else {
+		if !containsLanguage(lang, project) {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Language not present in project"})
+			println("language not in project")
+			return
+		}
+		var diffs []diffDTO
+		body := c.Request.Body
+		r := csv.NewReader(body)
+		r.Comma = ';'
+		for {
+			// Read each line from csv
+			line, err := r.Read()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatal(err)
+			}
+			identifier := line[0]
+			translation := line[1]
+			check, translationOld, identifierId := checkIdtentifier(identifier, translation, lang, project)
+			create := false
+			update := false
+			if check == 1 {
+				create = true
+			} else if check == 2 {
+				update = true
+			}
+			toChange := check > 0
+			diffs = append(
+				diffs,
+				diffDTO{
+					Identifier:     identifier,
+					IdentifierId:   identifierId,
+					Create:         create,
+					Update:         update,
+					ToChange:       toChange,
+					TranslationOld: translationOld,
+					TranslationNew: translation})
+		}
+		c.JSON(http.StatusOK, diffs)
+	}
 }
 func exportIOS(c *gin.Context) {
 	id := c.Param("id")

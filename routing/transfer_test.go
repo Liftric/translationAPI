@@ -45,6 +45,34 @@ func TestImportAndroid(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, w3.Code)
 }
 
+func TestImportCSV(t *testing.T) {
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var csvString = []byte(`key1;translation1;
+key2;newTranslation2;
+key3;translation3;`)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/project/1/excel/de", bytes.NewBuffer(csvString))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, `[{"Identifier":"key1","IdentifierId":1,"Create":false,"Update":false,"ToChange":false,"TranslationNew":"translation1","TranslationOld":"translation1"},{"Identifier":"key2","IdentifierId":2,"Create":false,"Update":true,"ToChange":true,"TranslationNew":"newTranslation2","TranslationOld":"\"translation2\""},{"Identifier":"key3","IdentifierId":0,"Create":true,"Update":false,"ToChange":true,"TranslationNew":"translation3","TranslationOld":""}]`, w.Body.String())
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("POST", "/project/1/excel/es", bytes.NewBuffer(csvString))
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, http.StatusNotFound, w2.Code)
+
+	w3 := httptest.NewRecorder()
+	req3, _ := http.NewRequest("POST", "/project/100/excel/de", bytes.NewBuffer(csvString))
+	router.ServeHTTP(w3, req3)
+
+	assert.Equal(t, http.StatusNotFound, w3.Code)
+}
+
 func TestExportIos(t *testing.T) {
 	router := setupTestEnvironment()
 	defer db.Close()
