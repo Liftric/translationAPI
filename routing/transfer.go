@@ -131,6 +131,9 @@ func diffExcel(c *gin.Context) {
 				log.Fatal(err)
 			}
 			identifier := line[0]
+			if (identifier == "") {
+				continue
+			}
 			translation := line[1]
 			check, translationOld, identifierId := checkIdtentifier(identifier, translation, lang, project)
 			create := false

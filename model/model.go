@@ -27,6 +27,7 @@ func InitDB(db *gorm.DB) {
 	db.AutoMigrate(&StringIdentifier{})
 	db.AutoMigrate(&Translation{})
 	db.AutoMigrate(&Revision{})
+	db.AutoMigrate(&User{})
 }
 
 type Project struct {
@@ -52,6 +53,7 @@ type StringIdentifier struct {
 	Project      Project       `gorm:"foreignkey:ProjectID"`
 	ProjectID    uint          `gorm:"not null;unique_index:idx_identifier_project"`
 	Translations []Translation `gorm:"foreignkey:StringIdentifierID"`
+	createdBy    User          `gorm:"foreignkey:UserID"`
 }
 
 // Translation of a string in one language
@@ -65,6 +67,7 @@ type Translation struct {
 	Approved           bool             `gorm:"default:'false'"`
 	ImprovementNeeded  bool             `gorm:"default:'false'"`
 	Revisions          []Revision       `gorm:"foreignkey:TranslationID"`
+	lastUpdatedBy      User             `gorm:"foreignkey:UserID"`
 }
 
 type Revision struct {
@@ -73,4 +76,13 @@ type Revision struct {
 	Translation         Translation `gorm:"foreignkey:TranslationID"`
 	TranslationID       uint        `gorm:"not null"`
 	Approved            bool        `gorm:"default:'false'"`
+	translatedBy        User        `gorm:"foreignkey:UserID"`
+}
+
+type User struct {
+	gorm.Model
+	Mail     string
+	Username string
+	Password string
+	Admin    bool
 }

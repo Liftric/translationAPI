@@ -51,7 +51,8 @@ func TestImportCSV(t *testing.T) {
 
 	var csvString = []byte(`key1;translation1;
 key2;newTranslation2;
-key3;translation3;`)
+key3;translation3;
+;;`)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/project/1/excel/de", bytes.NewBuffer(csvString))

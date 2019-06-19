@@ -2,6 +2,7 @@ package routing
 
 import (
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"preventis.io/translationApi/model"
 )
 
@@ -44,6 +45,17 @@ func setupTestEnvironment() *gin.Engine {
 	db.Create(&revision1)
 	db.Create(&revision2)
 	db.Create(&revision3)
+
+	saltedBytes := []byte("password")
+	hashedBytes, _ := bcrypt.GenerateFromPassword(saltedBytes, bcrypt.DefaultCost)
+
+	hash := string(hashedBytes[:])
+
+	admin := model.User{Username: "admin1", Password: hash, Mail: "admin1@example.com", Admin: true}
+	user := model.User{Username: "user1", Password: hash, Mail: "user1@example.com", Admin: false}
+
+	db.Create(&admin)
+	db.Create(&user)
 
 	router := setupRouter()
 	return router

@@ -2,6 +2,8 @@ package routing
 
 import (
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"os"
@@ -15,6 +17,11 @@ func setupRouter() *gin.Engine {
 	config.AllowOrigins = []string{getEnv("FRONTEND_URL", "http://localhost:3000")}
 	config.AllowMethods = []string{"GET", "PUT", "POST", "DELETE"}
 	r.Use(cors.New(config))
+	store := cookie.NewStore([]byte("dnY2gI51kUvlQ4hkJMcX2MNiQ9xt9IFx"))
+	r.Use(sessions.Sessions("translationSession", store))
+
+	r.POST("/login", login)
+	r.GET("/logout", logout)
 
 	projectsRoutes := r.Group("/projects")
 	{
