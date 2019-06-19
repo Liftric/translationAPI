@@ -53,3 +53,20 @@ func TestLogoutRoute(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 }
 
+func TestCreateUserRoute(t *testing.T) {
+	router := setupTestEnvironment()
+	defer db.Close()
+
+	var jsonStr = []byte(`{"loginName": "admin1", "password": "password"}`)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(jsonStr))
+	router.ServeHTTP(w, req)
+
+	var jsonStr2 = []byte(`{"name": "admin2", "password": "password2", "admin": true, "mail": "admin2@example.com"}`)
+	req, _ = http.NewRequest("POST", "/user/create", bytes.NewBuffer(jsonStr2))
+	req.Header.Set("Cookie", w.Header().Get("Set-Cookie"))
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 201, w.Code)
+}

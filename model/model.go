@@ -81,8 +81,8 @@ type Revision struct {
 
 type User struct {
 	gorm.Model
-	Mail     string
-	Username string
+	Mail     string `gorm:"unique;not null"`
+	Username string `gorm:"unique;not null"`
 	Password string
-	Admin    bool
+	Admin    bool `gorm:"default:'false'"`
 }
