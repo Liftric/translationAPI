@@ -52,3 +52,4 @@ func TestLogoutRoute(t *testing.T) {
 
 	assert.Equal(t, 200, w.Code)
 }
+

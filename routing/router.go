@@ -23,6 +23,12 @@ func setupRouter() *gin.Engine {
 	r.POST("/login", login)
 	r.GET("/logout", logout)
 
+	userRoutes := r.Group("/user")
+	{
+		// create user
+		userRoutes.POST("/create", createUser)
+	}
+
 	projectsRoutes := r.Group("/projects")
 	{
 		// display all projects (with statistics)

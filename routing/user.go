@@ -37,8 +37,14 @@ func login(c *gin.Context) {
 
 	session := sessions.Default(c)
 	session.Set("username", user.Username)
-	session.Set("admin", user.Admin)
+	if (user.Admin) {
+		session.Set("admin", user.Admin)
+	}
 	session.Set("userID", user.ID)
+	err = session.Save()
+	if (err != nil) {
+		println(err.Error())
+	}
 	c.Status(http.StatusOK)
 }
 
@@ -52,7 +58,7 @@ type userValidation struct {
 	Name     string `form:"name" json:"name" xml:"name"  binding:"required"`
 	Password string `form:"password" json:"password" xml:"password"  binding:"required"`
 	Admin    bool   `form:"admin" json:"admin" xml:"admin"  binding:"required"`
-	Mail     string `form:"admin" json:"admin" xml:"admin"  binding:"required"`
+	Mail     string `form:"mail" json:"mail" xml:"mail"  binding:"required"`
 }
 
 type loginValidation struct {
@@ -61,6 +67,13 @@ type loginValidation struct {
 }
 
 func createUser(c *gin.Context) {
+	session := sessions.Default(c)
+	admin := session.Get("admin")
+	if(admin == nil) {
+		println("no admin")
+		c.Status(http.StatusForbidden)
+		return
+	}
 	var json userValidation
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
