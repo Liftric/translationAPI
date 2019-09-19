@@ -42,7 +42,7 @@ func TestGetProject(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, `{"Id":1,"Name":"Shared","BaseLanguage":{"IsoCode":"en","Name":"English"},"Languages":[{"IsoCode":"de","Name":"German"},{"IsoCode":"en","Name":"English"}],"Identifiers":[{"Id":1,"Identifier":"key1","Translations":[{"Id":1,"Translation":"translation1","Language":"de","Approved":false,"ImprovementNeeded":false}]},{"Id":2,"Identifier":"key2","Translations":[{"Id":2,"Translation":"\"translation2\"","Language":"de","Approved":false,"ImprovementNeeded":false}]}]}`, w.Body.String())
+	assert.Equal(t, `{"Id":1,"Name":"Shared","BaseLanguage":{"IsoCode":"en","Name":"English"},"Languages":[{"IsoCode":"de","Name":"German"},{"IsoCode":"en","Name":"English"}],"Identifiers":[{"Id":1,"Identifier":"key1","Translations":[{"Id":1,"Translation":"translation1'","Language":"de","Approved":false,"ImprovementNeeded":false}]},{"Id":2,"Identifier":"key2","Translations":[{"Id":2,"Translation":"\"translation2\"","Language":"de","Approved":false,"ImprovementNeeded":false}]}]}`, w.Body.String())
 }
 
 func TestCreateProject(t *testing.T) {

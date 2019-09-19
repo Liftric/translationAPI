@@ -30,7 +30,7 @@ func setupTestEnvironment() *gin.Engine {
 	db.Create(&key2)
 	db.Create(&key3)
 
-	translation1 := model.Translation{Translation: "translation1", Identifier: key1, Language: ger}
+	translation1 := model.Translation{Translation: "translation1'", Identifier: key1, Language: ger}
 	translation2 := model.Translation{Translation: "\"translation2\"", Identifier: key2, Language: ger}
 	translation3 := model.Translation{Translation: "translation2", Identifier: key3, Language: ger, Approved: true}
 

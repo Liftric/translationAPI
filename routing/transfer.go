@@ -131,7 +131,7 @@ func diffExcel(c *gin.Context) {
 				log.Fatal(err)
 			}
 			identifier := line[0]
-			if (identifier == "") {
+			if identifier == "" {
 				continue
 			}
 			translation := line[1]
@@ -241,7 +241,8 @@ func getAndroidExportStrings(project model.Project, lang string) []androidString
 	for _, e := range project.Identifiers {
 		for _, t := range e.Translations {
 			if t.LanguageRefer == lang {
-				translation := androidString{Identifier: e.Identifier, Translation: t.Translation}
+				escapedTranslation := strings.ReplaceAll(t.Translation, "'", "\\'")
+				translation := androidString{Identifier: e.Identifier, Translation: escapedTranslation}
 				resList = append(resList, translation)
 			}
 		}
