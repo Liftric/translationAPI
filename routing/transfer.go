@@ -324,7 +324,9 @@ func exportJSON(c *gin.Context) {
 		}
 		for _, e := range project.Identifiers {
 			for _, t := range e.Translations {
-				languageMap[t.LanguageRefer][e.Identifier] = t.Translation
+				if _, ok := languageMap[t.LanguageRefer]; ok {
+					languageMap[t.LanguageRefer][e.Identifier] = t.Translation
+				}
 			}
 		}
 		c.JSON(http.StatusOK, languageMap)
