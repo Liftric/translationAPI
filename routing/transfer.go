@@ -241,7 +241,7 @@ func getAndroidExportStrings(project model.Project, lang string) []androidString
 	for _, e := range project.Identifiers {
 		for _, t := range e.Translations {
 			if t.LanguageRefer == lang {
-				escapedTranslation := strings.ReplaceAll(t.Translation, "'", "\\'")
+				var escapedTranslation = strings.ReplaceAll(t.Translation, "'", "\\'")
 				translation := androidString{Identifier: e.Identifier, Translation: escapedTranslation}
 				resList = append(resList, translation)
 			}
