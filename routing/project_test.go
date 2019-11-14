@@ -18,7 +18,7 @@ func TestProjectsRoute(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, `[{"Id":1,"Name":"Shared","BaseLanguage":{"IsoCode":"en","Name":"English"},"Languages":[{"IsoCode":"de","Name":"German"},{"IsoCode":"en","Name":"English"}]},{"Id":2,"Name":"Base","BaseLanguage":{"IsoCode":"de","Name":"German"},"Languages":[{"IsoCode":"de","Name":"German"}]}]`, w.Body.String())
+	assert.Equal(t, `[{"Id":1,"Name":"Shared","BaseLanguage":{"IsoCode":"en","Name":"English"},"Languages":[{"IsoCode":"de","Name":"German"},{"IsoCode":"en","Name":"English"}]},{"Id":2,"Name":"Base","BaseLanguage":{"IsoCode":"de","Name":"German"},"Languages":[{"IsoCode":"de","Name":"German"}]},{"Id":3,"Name":"LineBreak","BaseLanguage":{"IsoCode":"de","Name":"German"},"Languages":[{"IsoCode":"de","Name":"German"}]}]`, w.Body.String())
 }
 
 func TestArchivedProjectsRoute(t *testing.T) {
@@ -30,7 +30,7 @@ func TestArchivedProjectsRoute(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, `[{"Id":3,"Name":"Archived","BaseLanguage":{"IsoCode":"","Name":""},"Languages":[]}]`, w.Body.String())
+	assert.Equal(t, `[{"Id":4,"Name":"Archived","BaseLanguage":{"IsoCode":"","Name":""},"Languages":[]}]`, w.Body.String())
 }
 
 func TestGetProject(t *testing.T) {

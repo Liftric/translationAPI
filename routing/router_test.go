@@ -18,25 +18,31 @@ func setupTestEnvironment() *gin.Engine {
 
 	proj1 := model.Project{Name: "Shared", BaseLanguage: eng, Languages: []model.Language{ger, eng}}
 	proj2 := model.Project{Name: "Base", BaseLanguage: ger, Languages: []model.Language{ger}}
+	proj3 := model.Project{Name: "LineBreak", BaseLanguage: ger, Languages: []model.Language{ger}}
 	archivedProj := model.Project{Name: "Archived", BaseLanguage: ger, Archived: true}
 	db.Create(&proj1)
 	db.Create(&proj2)
+	db.Create(&proj3)
 	db.Create(&archivedProj)
 
 	key1 := model.StringIdentifier{Identifier: "key1", Project: proj1}
 	key2 := model.StringIdentifier{Identifier: "key2", Project: proj1}
 	key3 := model.StringIdentifier{Identifier: "key2", Project: proj2}
+	key4 := model.StringIdentifier{Identifier: "LineBreakKey", Project: proj3}
 	db.Create(&key1)
 	db.Create(&key2)
 	db.Create(&key3)
+	db.Create(&key4)
 
 	translation1 := model.Translation{Translation: "translation1'", Identifier: key1, Language: ger}
 	translation2 := model.Translation{Translation: "\"translation2\"", Identifier: key2, Language: ger}
 	translation3 := model.Translation{Translation: "translation2", Identifier: key3, Language: ger, Approved: true}
+	translation4 := model.Translation{Translation: "This is a string with a line\n\nbreak", Identifier: key4, Language: ger, Approved: true}
 
 	db.Create(&translation1)
 	db.Create(&translation2)
 	db.Create(&translation3)
+	db.Create(&translation4)
 
 	revision1 := model.Revision{Translation: translation1, RevisionTranslation: translation1.Translation, Approved: translation1.Approved}
 	revision2 := model.Revision{Translation: translation2, RevisionTranslation: translation2.Translation, Approved: translation2.Approved}

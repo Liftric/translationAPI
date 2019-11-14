@@ -19,7 +19,7 @@ func login(c *gin.Context) {
 	}
 	var users []model.User
 	db.Where("Username = ?", json.LoginName, json.LoginName).Find(&users)
-	if (len(users) != 1) {
+	if len(users) != 1 {
 		c.Status(http.StatusNotFound)
 		fmt.Printf("found %d users instead of one", len(users))
 		return
@@ -37,12 +37,12 @@ func login(c *gin.Context) {
 
 	session := sessions.Default(c)
 	session.Set("username", user.Username)
-	if (user.Admin) {
+	if user.Admin {
 		session.Set("admin", user.Admin)
 	}
 	session.Set("userID", user.ID)
 	err = session.Save()
-	if (err != nil) {
+	if err != nil {
 		println(err.Error())
 	}
 	c.Status(http.StatusOK)
@@ -69,7 +69,7 @@ type loginValidation struct {
 func createUser(c *gin.Context) {
 	session := sessions.Default(c)
 	admin := session.Get("admin")
-	if(admin == nil) {
+	if admin == nil {
 		println("no admin")
 		c.Status(http.StatusForbidden)
 		return

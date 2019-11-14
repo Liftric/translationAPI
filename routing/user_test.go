@@ -45,7 +45,6 @@ func TestLogoutRoute(t *testing.T) {
 	router := setupTestEnvironment()
 	defer db.Close()
 
-
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/logout", nil)
 	router.ServeHTTP(w, req)

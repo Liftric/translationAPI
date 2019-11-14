@@ -18,6 +18,13 @@ func TestExportAndroid(t *testing.T) {
 
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, "<resources>\n  <string name=\"key1\">translation1\\&#39;</string>\n  <string name=\"key2\">&#34;translation2&#34;</string>\n</resources>", w.Body.String())
+
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("GET", "/project/3/android/de", nil)
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 200, w2.Code)
+	assert.Equal(t, "<resources>\n  <string name=\"LineBreakKey\">This is a string with a line\n\nbreak</string>\n</resources>", w2.Body.String())
 }
 
 func TestImportAndroid(t *testing.T) {

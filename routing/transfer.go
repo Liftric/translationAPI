@@ -231,8 +231,11 @@ func exportAndroid(c *gin.Context) {
 		c.Header("Content-Type", "text/xml")
 		c.Header("Content-Disposition", `attachment; filename="strings.xml"`)
 
+		// replace xml encoded line break, maybe in future this is not needed anymore https://github.com/golang/go/issues/20614
+		xmlString := strings.ReplaceAll(w.String(), "&#xA;", "\n")
+
 		// not using c.XML because of formatting
-		c.String(http.StatusOK, w.String())
+		c.String(http.StatusOK, xmlString)
 	}
 }
 
