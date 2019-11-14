@@ -24,7 +24,7 @@ func TestExportAndroid(t *testing.T) {
 	router.ServeHTTP(w2, req2)
 
 	assert.Equal(t, 200, w2.Code)
-	assert.Equal(t, "<resources>\n  <string name=\"LineBreakKey\">This is a string with a line\n\nbreak</string>\n</resources>", w2.Body.String())
+	assert.Equal(t, "<resources>\n  <string name=\"LineBreakKey\">This is a string with a line\\n\\nbreak</string>\n</resources>", w2.Body.String())
 }
 
 func TestImportAndroid(t *testing.T) {
